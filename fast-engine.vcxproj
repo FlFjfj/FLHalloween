@@ -19,10 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <Fast Include="main.fast" />
     <Fast Include="modules\universal\Application.fast" />
     <Fast Include="modules\universal\base\Algebra.fast" />
     <Fast Include="modules\universal\base\ArrayInputStream.fast" />
     <Fast Include="modules\universal\BoxSpartialIndex2.fast" />
+    <Fast Include="modules\universal\GLUtils.fast" />
     <Fast Include="modules\universal\Model.fast" />
     <Fast Include="modules\universal\Program.fast" />
     <Fast Include="modules\universal\Simple3D.fast" />
@@ -43,7 +45,6 @@
     <Fast Include="sl\string.fast" />
     <Fast Include="sl\union.fast" />
     <Fast Include="sl\variant.fast" />
-    <Fast Include="test.fast" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />

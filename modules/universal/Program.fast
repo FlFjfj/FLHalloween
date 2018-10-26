@@ -51,7 +51,7 @@ Program: {
     linkStatus: Int32;
     @linkStatus GL_LINK_STATUS program glGetProgramiv
     linkStatus Nat32 cast GL_TRUE = ~ [
-      "glLinkProgram failed" failProc
+      "glLinkProgram failed" print
     ] when
 
     uniforms fieldCount [

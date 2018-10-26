@@ -1,0 +1,39 @@
+"glutils" module
+
+"control" useModule
+"string" useModule
+"opengl" useModule
+
+{
+  filename: Text;
+  force_channels: Int32;
+  reuse_id: Nat32;
+  flags: Nat32;
+} Nat32 {} "SOIL_load_OGL_texture" importFunction
+
+loadTexture: [
+  name:; 0n32 0n32 4i32 name SOIL_load_OGL_texture
+] func;
+
+generateFramebuffer: [
+  width:height:;;
+  fbo: GLuint dynamic;
+  texture: GLuint dynamic;
+  @fbo 1 glGenFramebuffers
+  fbo GL_FRAMEBUFFER glBindFramebuffer
+  @texture 1 glGenTextures
+  texture GL_TEXTURE_2D glBindTexture
+  0nx GL_UNSIGNED_BYTE GL_RGBA 0i32 height width GL_RGBA Int32 cast 0i32 GL_TEXTURE_2D glTexImage2D
+  GL_LINEAR Int32 cast GL_TEXTURE_MIN_FILTER GL_TEXTURE_2D glTexParameteri
+  GL_LINEAR Int32 cast GL_TEXTURE_MAG_FILTER GL_TEXTURE_2D glTexParameteri
+  0n32 GL_TEXTURE_2D glBindTexture
+  0i32 texture GL_TEXTURE_2D GL_COLOR_ATTACHMENT0 GL_FRAMEBUFFER glFramebufferTexture2D
+  GL_FRAMEBUFFER glCheckFramebufferStatus code:; code
+  GL_FRAMEBUFFER_COMPLETE = not
+  [ "Frame buffer error: " print code print LF print ] when
+
+
+  0n32 GL_FRAMEBUFFER glBindFramebuffer
+  fbo
+  texture
+] func;
