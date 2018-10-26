@@ -1,0 +1,1986 @@
+"system" module
+
+"control" useModule
+"string" useModule
+
+"algebra" useModule
+"application" useModule
+"glwrapper" useModule
+"opengl" useModule
+"winapi" useModule
+
+# fills the struct with type check
+makeStruct: [
+  struct:;
+  i: struct fieldCount 1 -; [
+    i @struct @ set
+    i 1 - @i set
+    i 0 < not
+  ] loop
+
+  FALSE dynamic [DELIMITER: |; @DELIMITER set] [x:;] if
+  @struct
+] func;
+
+|: [{
+  virtual IS_DELIMITER: ();
+}] func;
+
+POINTER_SIZE: [Natx storageSize 8nx *] func;
+
+printLastError: [LF print GetLastError print LF print] func;
+
+toUtf16: [
+  source:;
+  sourceBytes: source textSize Intx cast Int32 cast;
+  destSizeWChars:
+  0
+  0nx
+  sourceBytes
+  source stringMemory
+  MB_ERR_INVALID_CHARS
+  CP_UTF8 MultiByteToWideChar;
+
+  [destSizeWChars 0 = not] "MultiByteToWideChar failed" assert
+
+  destSizeBytes: destSizeWChars 2 *;
+  destStringMemory: destSizeBytes 2 + Intx cast Natx cast mplMalloc;
+  writtenWChars:
+  destSizeWChars
+  destStringMemory
+  sourceBytes
+  source stringMemory
+  MB_ERR_INVALID_CHARS
+  CP_UTF8 MultiByteToWideChar;
+
+  [destSizeWChars writtenWChars =] "MultiByteToWideChar failed" assert
+
+  last2Bytes: destStringMemory destSizeBytes Intx cast Natx cast + Nat16 Ref cast;
+  0n16 @last2Bytes set
+  {data: destStringMemory copy; size: destSizeBytes copy; DIE: [data mplFree];}
+] func;
+
+Key: [Int32] func;
+
+MOUSE_LEFT: [1i32] func;
+MOUSE_MIDDLE: [2i32] func;
+MOUSE_RIGHT: [3i32] func;
+BACK: [4i32] func;
+BACKSPACE: [8i32] func;
+TAB: [9i32] func;
+ENTER: [13i32] func;
+SHIFT: [16i32] func;
+CONTROL: [17i32] func;
+ALT: [18i32] func;
+VOLUME_UP: [24i32] func;
+VOLUME_DOWN: [25i32] func;
+ESCAPE: [27i32] func;
+PAGE_UP: [33i32] func;
+PAGE_DOWN: [34i32] func;
+END: [35i32] func;
+HOME: [36i32] func;
+LEFT: [37i32] func;
+UP: [38i32] func;
+RIGHT: [39i32] func;
+DOWN: [40i32] func;
+INSERT: [45i32] func;
+DELETE: [46i32] func;
+NUMERIC_PLUS: [107i32] func;
+NUMERIC_MINUS: [109i32] func;
+F1: [112i32] func;
+F2: [113i32] func;
+F3: [114i32] func;
+F4: [115i32] func;
+F5: [116i32] func;
+F6: [117i32] func;
+F7: [118i32] func;
+F8: [119i32] func;
+F9: [120i32] func;
+F10: [121i32] func;
+F11: [122i32] func;
+F12: [123i32] func;
+
+System: [{
+  windowSize: Nat32 2 Vector dynamic;
+  stopped: Cond dynamic;
+  windowName: String dynamic;
+  windowClass: Nat16 dynamic;
+  window: Natx dynamic;
+  renderingContext: Natx dynamic;
+  mouseLock: Nat8 dynamic;
+  mouseVisible: Cond dynamic;
+  mousePosition: Int32 2 Vector dynamic;
+  pointerCount: Nat8 dynamic;
+  pointerActive: Cond 8 array dynamic;
+  pointerPosition: Int32 2 Vector 16 array dynamic;
+  focus: Cond dynamic;
+  keys: Cond 256 array dynamic;
+  positionChanging: Cond dynamic;
+  application: Application dynamic;
+
+  INIT: [
+    user32dll: "user32.dll" toUtf16 GetModuleHandleW;
+    user32dll 0nx = ~ [
+      "System::System, GetModuleHandleW failel" failProc
+    ] when
+
+    setProcessDPIAwareRef: "SetProcessDPIAware" user32dll GetProcAddress @setProcessDPIAwareExport cast;
+    @setProcessDPIAwareRef Natx cast 0nx = ~ [
+      resukt: setProcessDPIAware;
+      result 1n32 = ~ [
+        "SetProcessDPIAware failed" failProc
+      ] when
+    ] when
+
+    result: 0nx CoInitialize;
+    result 0 = ~ [
+      "System::System, CoInitialize failed" failProc
+    ] when
+  ];
+
+  DIE: [
+    #CoUninitialize
+  ];
+
+  stop: [
+    [stopped not] "Stop stopped system" assert
+    TRUE dynamic @stopped set
+  ] func;
+
+  getWindowName: [
+    windowName
+  ] func;
+
+  setWindowName: [toString @windowName set] func;
+
+  isContextCreated: [window 0nx = not] func;
+
+  hashMouse: [
+    [window 0nx = not] "System has no window" assert
+    TRUE
+  ] func;
+
+  canLockMouse: [
+    [window 0nx = not] "System has no window" assert
+    TRUE
+  ] func;
+
+  isMouseLocked: [
+    [window 0nx = not] "System has no window" assert
+    mouseLock 0n8 = not
+  ] func;
+
+  lockMouse: [
+    [window 0nx = ~ mouseLock 0n8 = and] "System has no window or mouse is locked" assert
+    (0n32 0n32) windowSize = ~ [
+      0 windowSize @ 2n32 / Int32 cast
+      1 windowSize @ 2n32 / Int32 cast setMousePosition
+      MOUSE_LEFT   keys @ not
+      MOUSE_RIGHT  keys @ not and
+      MOUSE_MIDDLE keys @ not and [
+        result: window SetCapture;
+      ] when
+    ] when
+
+    1n8 @mouseLock set
+  ] func;
+
+  unlockMouse: [
+    [window 0nx = ~ mouseLock 0n8 = ~ and] "System has no window or mouse is unlocked" assert
+    (0n32 0n32) windowSize = ~ [
+      0 windowSize @ 2n32 / Int32 cast
+      1 windowSize @ 2n32 / Int32 cast setMousePosition
+      MOUSE_LEFT   keys @ not
+      MOUSE_RIGHT  keys @ not and
+      MOUSE_MIDDLE keys @ not and [
+        result: ReleaseCapture;
+        ReleaseCapture 1i32 = not [
+          "System::unlockMouse, ReleaseCapture failed, result=" print GetLastError print
+          "" failProc
+        ] when
+      ] when
+    ] when
+
+    0n8 @mouseLock set
+  ] func;
+
+  isMouseVisible: [mouseVisible] func;
+
+  hideMouse: [
+    [window 0nx = ~ mouseVisible and] "error" assert
+    0 ShowCursor -1 = ~ [
+      "System::hideMouse, ShowCursor failed" failProc
+    ] when
+
+    FALSE @mouseVisible set
+  ] func;
+
+  showMouse: [
+    [window 0nx = ~ mouseVisible and] "error" assert
+    1 ShowCursor 0 = ~ [
+      "System::showMouse, ShowCursor failed" failProc
+    ] when
+
+    TRUE @mouseVisible set
+  ] func;
+
+  isWindowVisible: [
+    [window 0nx = ~] "System has no window" assert
+    (0n32 0n32) windowSize = ~
+  ] func;
+
+  getWindowSize: [
+    [window 0nx = ~ (0n32 0n32) windowSize = ~ and] "No window or zero window" assert
+    windowSize
+  ] func;
+
+  getMousePosition: [
+    [window 0nx = ~ (0n32 0n32) windowSize = ~ and] "No window or zero window" assert
+    mousePosition
+  ] func;
+
+  setMousePosition: [
+    [window 0nx = ~ (0n32 0n32) windowSize = ~ and] "No window or zero window" assert
+    0 windowSize @ 0n32 = not
+    1 windowSize @ 0n32 = not and [
+      position:;
+      point: POINT;
+      0 position @ @point.@x set
+      1 position @ @point.@x set
+      @point window ClientToScreen 1 = ~ [
+        "System::setMousePosition, ClientToScreen failed" failProc
+      ] when
+
+      point.y point.x SetCursorPos 1 = ~ [
+        "System::setMousePosition, SetCursorPos failed" failProc
+      ] when
+    ] when
+  ] func;
+
+  getPointerCount: [
+    [window 0nx = ~ (0n32 0n32) windowSize = ~ and] "No window or zero window" assert
+    pointerCount
+  ] func;
+
+  isPointerActive: [
+    index:;
+    [index pointerCount < 0nx window = ~ and (0n32 0n32) = ~ and] "error" assert
+    index pointerActive @
+  ] func;
+
+  getPointerPosition: [
+    [index pointerCount < 0nx window = ~ and (0n32 0n32) = ~ and] "error" assert
+    index pointerPosition @
+  ] func;
+
+  hasFocus: [
+    [window 0nx = ~ (0n32 0n32) windowSize = ~ and] "No window or zero window" assert
+    focus
+  ] func;
+
+  isKeyDown: [
+    key:;
+    [key 256 < window 0nx = ~ (0n32 0n32) windowSize = ~ and] "error" assert
+    key keys @
+  ] func;
+
+  hideSoftwareKeyboard: [] func;
+
+  showSoftwareKeyboard: [] func;
+
+  requestLoadFileDialog: [
+    onFileLoad:;
+    "unimplemented" failProc
+  ] func;
+
+  requestSaveFileDialog: [
+    onFileSave:;
+    data:;
+    "unimplemented" failProc
+  ] func;
+
+  setOnConnect: [
+    onConnect:;
+    "unimplemented" failProc
+  ] func;
+
+  setOnDisconnect: [
+    onDisconnect:;
+    "unimplemented" failProc
+  ] func;
+
+  setOnReceive: [
+    onReceive:;
+    "unimplemented" failProc
+  ] func;
+
+  isConnected: [
+    "unimplemented" failProc
+  ] func;
+
+  connect: [
+    host:port:;;
+    "unimplemented" failProc
+  ] func;
+
+  disconnect: [
+    "unimplemented" failProc
+  ] func;
+
+  send: [
+    data:;
+    "unimplemented" failProc
+  ] func;
+
+  getJobSystem: [
+    jobSystem
+  ] func;
+
+  getFileSystem: [
+    fileSystem
+  ] func;
+
+  getSoundSystem: [
+    SoundSystem
+  ] func;
+
+  run: [
+    application0: Application;
+    @self @application0.setSystem
+    @application0 move @application set
+    @application.init
+    FALSE dynamic @stopped set
+    createWindow
+    @application.onContextCreate
+    result0: SW_SHOWDEFAULT window ShowWindow;
+    stopped not [
+      [
+        message: MSG;
+        result: PM_REMOVE 0n32 0n32 0nx @message PeekMessageW;
+        [result 1 = stopped not and] [
+          x: @message DispatchMessageW;
+          PM_REMOVE 0n32 0n32 0nx @message PeekMessageW @result set
+        ] while
+
+        windowSize 0n32 dynamic 2 Vector = not stopped not and [
+          @application.onDraw
+          stopped not [
+            window GetDC SwapBuffers 1 = not [
+              [FALSE] "ERRROR" assert
+            ] when
+          ] when
+        ] when
+
+        stopped not
+      ] loop
+    ] when
+  ] func;
+
+  createWindow: [
+    windowName0: windowName toUtf16;
+    className: Nat16 Array;
+    POINTER_SIZE 2n32 rshift 1nx + Intx cast Int32 cast @className.resize
+    table: "0123456789ABCDEF" toUtf16;
+    atUtf16: [
+      table:;
+      index: Natx cast;
+      targetValue: @table.data index 2nx * + Nat16 Cref cast;
+      targetValue
+    ] func;
+
+    POINTER_SIZE 2n32 rshift Intx cast [
+      selfPtr: @self storageAddress;
+      index: selfPtr POINTER_SIZE 4nx - i 2n32 lshift Intx cast Natx cast - rshift 15nx and;
+      src: index table atUtf16;
+      dst: i @className @;
+      src @dst set
+    ] times
+
+    0n16 @className.last set
+    windowClassInfo: {
+      style: CS_OWNDC;
+      lpfnWndProc: @windowProcedureStatic Natx cast;
+      cbClsExtra: 0i32;
+      cbWndExtra: 0i32;
+      hInstance: 0nx;
+      hIcon: 0nx;
+      hCursor: IDC_ARROW 0nx LoadCursorW;
+      hbrBackground: 0nx;
+      lpszMenuName: 0nx;
+      lpszClassName: className.getBufferBegin;
+    };
+
+    windowClass: @windowClassInfo storageAddress RegisterClassW;
+    [windowClass 0n16 = not] "RegisterClassW error" assert
+
+    window0:
+    @self storageAddress
+    0nx
+    0nx
+    0nx
+    CW_USEDEFAULT
+    CW_USEDEFAULT
+    CW_USEDEFAULT
+    CW_USEDEFAULT
+    WS_MAXIMIZEBOX WS_MINIMIZEBOX or WS_SIZEBOX or WS_SYSMENU or
+    windowName0.data Natx cast
+    windowClass Natx cast
+    0n32 CreateWindowExW;
+    [window0 0nx = not] "CreateWindowExW error" assert
+    deviceContext: window0 GetDC;
+
+    pixelFormat: |
+    PIXELFORMATDESCRIPTOR storageSize Nat16 cast
+    1n16
+    PFD_DOUBLEBUFFER PFD_DRAW_TO_WINDOW or PFD_SUPPORT_OPENGL or
+    PFD_TYPE_RGBA
+    24n8
+    0n8
+    0n8
+    0n8
+    0n8
+    0n8
+    0n8
+    0n8
+    0n8
+    0n8
+    0n8
+    0n8
+    0n8
+    0n8
+    32n8
+    0n8
+    0n8
+    PFD_MAIN_PLANE
+    0n8
+    0n32
+    0n32
+    0n32
+    PIXELFORMATDESCRIPTOR makeStruct;
+
+    pixelFormatIndex: pixelFormat deviceContext ChoosePixelFormat;
+    [pixelFormatIndex 0 = not] "ChoosePixelFormat error" assert
+
+    setPixelFormatSuccess: pixelFormat pixelFormatIndex deviceContext SetPixelFormat;
+    [setPixelFormatSuccess 1i32 =] "SetPixelFormat error" assert
+
+    deviceContext wglCreateContext @renderingContext set
+    [renderingContext 0nx = not] "wglCreateContext error" assert
+
+    wglMakeCurrentSuccess: renderingContext deviceContext wglMakeCurrent;
+    [wglMakeCurrentSuccess] "wglMakeCurrentSuccess error" assert
+
+    "wglGetPixelFormatAttribivARB" wglGetProcAddress @wglGetPixelFormatAttribivARB_address set
+    "wglGetPixelFormatAttribfvARB" wglGetProcAddress @wglGetPixelFormatAttribfvARB_address set
+    "wglChoosePixelFormatARB" wglGetProcAddress @wglChoosePixelFormatARB_address set
+    wglDeleteContextSuccess: renderingContext wglDeleteContext;
+    destroyWindowSuccess: window0 DestroyWindow;
+
+    @self storageAddress
+    0nx
+    0nx
+    0nx
+    CW_USEDEFAULT
+    CW_USEDEFAULT
+    CW_USEDEFAULT
+    CW_USEDEFAULT
+    WS_MAXIMIZEBOX WS_MINIMIZEBOX or WS_SIZEBOX or WS_SYSMENU or
+    windowName0.data Natx cast
+    windowClass Natx cast
+    0n32 CreateWindowExW @window0 set
+    [window0 0nx = not] "CreateWindowExW error" assert
+
+    window0 GetDC @deviceContext set
+    attributes: (
+      WGL_DOUBLE_BUFFER_ARB Int32 cast
+      GL_TRUE Int32 cast
+      WGL_DRAW_TO_WINDOW_ARB Int32 cast
+      GL_TRUE Int32 cast
+      WGL_SUPPORT_OPENGL_ARB Int32 cast
+      GL_TRUE Int32 cast
+      WGL_PIXEL_TYPE_ARB Int32 cast
+      WGL_TYPE_RGBA_ARB Int32 cast
+      WGL_COLOR_BITS_ARB Int32 cast
+      24i32
+      WGL_DEPTH_BITS_ARB Int32 cast
+      24i32
+      0i32
+    );
+
+    formatCount: Nat32;
+    wglChoosePixelFormatARBSuccess:
+    @formatCount storageAddress
+    @pixelFormatIndex storageAddress
+    1n32
+    0nx
+    @attributes storageAddress
+    deviceContext
+    wglChoosePixelFormatARB;
+    [wglChoosePixelFormatARBSuccess] "wglChoosePixelFormatARB error" assert
+
+    setPixelFormatSuccess: pixelFormat pixelFormatIndex deviceContext SetPixelFormat;
+    [setPixelFormatSuccess 1i32 =] "SetPixelFormat error" assert
+
+    deviceContext wglCreateContext @renderingContext set
+    [renderingContext 0nx = not] "wglCreateContext error" assert
+
+    wglMakeCurrentSuccess: renderingContext deviceContext wglMakeCurrent;
+    [wglMakeCurrentSuccess] "wglMakeCurrentSuccess error" assert
+
+    result: loadProcedures;
+    [wglMakeCurrentSuccess] "loadProcedures error" assert
+
+    window0 @window set
+  ] func;
+
+  destroyWindow: [
+    renderingContext wglDeleteContext
+    window DestroyWindow
+    0nx windowClass UnregisterClassW
+    0nx @window set
+  ] func;
+
+  windowProcedure: [
+    window0:message:data0:data1:;;;;
+    list: (window0 message data0 data1);
+    #list fieldCount [i list @ print " " print] times LF print
+    returnValue: -1ix;
+
+    message
+    (
+      WM_MOVE [
+        mouseLock 2n8 = [1n8 @mouseLock set] when
+        FALSE @positionChanging set
+      ]
+
+      WM_SIZE [
+        newWindowSize: (
+          data1 0xFFFFnx and Nat32 cast
+          data1 16n32 rshift 0xFFFFnx and Nat32 cast
+        );
+
+        windowSize newWindowSize = not [
+          windowSize (0n32 0n32) = [
+            newWindowSize @windowSize set
+            (0 0) !mousePosition
+            keys fieldCount dynamic [FALSE i @keys @ set] times
+            1 windowSize @ Int32 cast 0 windowSize @ Int32 cast 0 0 glViewport
+            windowSize @application.onWindowShow
+            focus [
+              mouseLock 0n8 = ~ [
+                point:
+                0 windowSize @ 2n32 / Int32 cast
+                1 windowSize @ 2n32 / Int32 cast makePoint;
+                result: @point window0 ClientToScreen;
+                result: point.y point.x SetCursorPos;
+                result: window0 SetCapture;
+                1n8 @mouseLock set
+              ] when
+
+              @application.onWindowFocusGain
+            ] when
+          ] [
+            newWindowSize (0n32 0n32) = [
+              focus [
+                keys fieldCount dynamic [i keys @ [i keyUp] when] times
+                FALSE @focus set
+                @application.onWindowFocusLose
+                TRUE @focus set
+              ] when
+
+              newWindowSize @windowSize set
+              @application.onWindowHide
+            ] [
+              newWindowSize @windowSize set
+              1 windowSize @ Int32 cast 0 windowSize @ Int32 cast 0 0 glViewport
+              windowSize @application.onWindowResize
+            ] if
+          ] if
+        ] [
+          FALSE @positionChanging set
+        ] if
+      ]
+
+      WM_SETFOCUS [
+        [focus ~ ] "setfocus when focused" assert
+        TRUE @focus set
+        (0n32 0n32) windowSize = ~ [
+          0n8 mouseLock = ~ [
+            point:
+            0 windowSize @ 2n32 / Int32 cast
+            1 windowSize @ 2n32 / Int32 cast makePoint;
+            result: @point window0 ClientToScreen;
+            result: point.y point.x SetCursorPos;
+            result: window0 SetCapture;
+            1n8 @mouseLock set
+          ] when
+
+          @application.onWindowFocusGain
+
+        ] when
+      ]
+
+      WM_KILLFOCUS [
+        [focus] "KILLFOCUS when not focused" assert
+        FALSE @focus set
+        (0n32 0n32) windowSize = ~ [
+          keys fieldCount dynamic [i keys @ [i keyUp] when] times
+          @application.onWindowFocusLose
+        ] when
+      ]
+
+      WM_CLOSE [
+        @application.onClose
+        0ix @returnValue set
+      ]
+
+      WM_KEYDOWN [
+        [focus] "WM_KEYDOWN when not focused" assert
+        (0n32 0n32) windowSize = ~ [
+          data0 Intx cast Key cast keyDown [
+            0ix @returnValue set
+          ] when
+
+          # TODO:
+          # MSG messageData{window0, message, data0, data1, 0, {0, 0}};
+          # TranslateMessage(&messageData);
+          1ix @returnValue set
+        ] when
+        1ix @returnValue set
+      ] WM_KEYDOWN_CASE:; WM_KEYDOWN_CASE
+
+      WM_SYSKEYDOWN WM_KEYDOWN_CASE
+
+      WM_KEYUP [
+        [focus] "WM_KEYUP when not focused" assert
+        (0n32 0n32) windowSize = ~ [
+          data0 Intx cast Key cast keyUp
+        ] when
+
+        1ix @returnValue set
+      ] WM_KEYUP_CASE:; WM_KEYUP_CASE
+
+      WM_SYSKEYUP WM_KEYUP_CASE
+
+      WM_CHAR [
+        data0 Nat32 cast @application.onCharacter [
+          0ix @returnValue set
+        ] [
+          1ix @returnValue set
+        ] if
+      ]
+
+      WM_LBUTTONDOWN [
+        [(0n32 0n32) windowSize = ~ focus and] "window has zero size" assert
+        0n8 mouseLock =
+        MOUSE_MIDDLE keys @ ~ and
+        MOUSE_RIGHT keys @ ~ and [
+          result: window0 SetCapture;
+        ] when
+
+        result: MOUSE_LEFT keyDown;
+        0ix @returnValue set
+      ]
+
+      WM_LBUTTONUP [
+        [(0n32 0n32) windowSize = ~ focus and] "window has zero size" assert
+        0n8 mouseLock =
+        MOUSE_MIDDLE keys @ ~ and
+        MOUSE_RIGHT keys @ ~ and [
+          resuklt: ReleaseCapture;
+        ] when
+
+        MOUSE_LEFT keyUp
+        0ix @returnValue set
+      ]
+
+      WM_MBUTTONDOWN [
+        [(0n32 0n32) windowSize = ~ focus and] "window has zero size" assert
+        0n8 mouseLock =
+        MOUSE_LEFT keys @ ~ and
+        MOUSE_RIGHT keys @ ~ and [
+          result: window0 SetCapture;
+        ] when
+
+        result: MOUSE_MIDDLE keyDown;
+        0ix @returnValue set
+      ]
+
+      WM_MBUTTONUP [
+        [(0n32 0n32) windowSize = ~ focus and] "window has zero size" assert
+        0n8 mouseLock =
+        MOUSE_LEFT keys @ ~ and
+        MOUSE_RIGHT keys @ ~ and [
+          result: ReleaseCapture;
+        ] when
+
+        MOUSE_MIDDLE keyUp
+        0ix @returnValue set
+      ]
+
+      WM_RBUTTONDOWN [
+        [(0n32 0n32) windowSize = ~ focus and] "window has zero size" assert
+        0n8 mouseLock =
+        MOUSE_LEFT keys @ ~ and
+        MOUSE_MIDDLE keys @ ~ and [
+          result: window0 SetCapture;
+        ] when
+
+        result: MOUSE_RIGHT keyDown;
+        0ix @returnValue set
+      ]
+
+      WM_RBUTTONUP [
+        [(0n32 0n32) windowSize = ~ focus and] "window has zero size" assert
+        0n8 mouseLock =
+        MOUSE_LEFT keys @ ~ and
+        MOUSE_MIDDLE keys @ ~ and [
+          result: ReleaseCapture;
+        ] when
+
+        MOUSE_RIGHT keyUp
+        0ix @returnValue set
+      ]
+
+      WM_MOUSEMOVE [
+        (0n32 0n32) windowSize = not
+        focus and
+        positionChanging ~ and [
+          (data1 GET_X_PARAM data1 GET_Y_PARAM) !mousePosition
+          mouseLock 0n8 = [
+            mousePosition @application.onMousePosition
+          ] [
+            center: (
+              0 windowSize @ Int32 cast 2 /
+              1 windowSize @ Int32 cast 2 /
+            );
+
+            delta: mousePosition center -;
+            (0 0) delta = not [
+              point: POINT;
+              0 center @ @point.@x set
+              1 center @ @point.@y set
+
+              result: @point window0 ClientToScreen;
+              result: point.x point.y SetCursorPos;
+              2n8 mouseLock = [delta @application.onMouseDelta] when
+            ] [
+              2n8 @mouseLock set
+            ] if
+          ] if
+        ] [
+          FALSE @positionChanging set
+        ] if
+
+        0ix @returnValue set
+      ]
+
+      WM_MOUSEWHEEL [
+        data0 GET_WHEEL_DELTA_WPARAM Real32 cast 1.0r32 120.0r32 / * @application.onMouseWheel
+      ]
+
+      WM_NCCALCSIZE [TRUE @positionChanging set]
+
+      WM_WINDOWPOSCHANGED [FALSE @positionChanging set]
+      []
+    ) case
+
+    returnValue -1ix = [
+      data1 data0 message window0 DefWindowProcW !returnValue
+    ] when
+
+    returnValue
+  ] func;
+
+  keyDown: [
+    key:;
+    TRUE key @keys @ set
+    key @application.onKeyPress
+  ] func;
+
+  keyUp: [
+    key:;
+    key @keys @ [
+      FALSE key @keys @ set
+      key @application.onKeyRelease
+    ] when
+  ] func;
+}] func;
+
+{hWnd: Natx; message: Nat32; data0: Natx; data1: Natx;} Intx {} [
+  data1:data0:message:window:;;;;
+
+  systemPtr: Natx;
+  message WM_NCCREATE = not [
+    GWLP_USERDATA window GetWindowLongPtrW @systemPtr set
+  ] [
+    createStruct: data1 CREATESTRUCTW Ref cast;
+    createStruct.lpCreateParams @systemPtr set
+    result: systemPtr GWLP_USERDATA window SetWindowLongPtrW;
+  ] if
+
+  result: Intx;
+  systemPtr 0nx = [
+    data1 data0 message window DefWindowProcW @result set
+  ] [
+    system: systemPtr System Ref cast;
+    window message data0 data1 @system.windowProcedure @result set
+  ] if
+
+  @result
+] "windowProcedureStatic" exportFunction
+
+{} Int32 {} [Int32] "SetProcessDPIAwareExport" exportFunction
+
+loadProcedures: [
+  procedureDescriptors: (
+    ("glActiveTexture" @glActiveTexture storageAddress)
+    ("glAttachShader" @glAttachShader storageAddress)
+    ("glBindAttribLocation" @glBindAttribLocation storageAddress)
+    ("glBindBuffer" @glBindBuffer storageAddress)
+    ("glBindFramebuffer" @glBindFramebuffer storageAddress)
+    ("glBindRenderbuffer" @glBindRenderbuffer storageAddress)
+    ("glBlendColor" @glBlendColor storageAddress)
+    ("glBlendEquation" @glBlendEquation storageAddress)
+    ("glBlendEquationSeparate" @glBlendEquationSeparate storageAddress)
+    ("glBlendFuncSeparate" @glBlendFuncSeparate storageAddress)
+    ("glBufferData" @glBufferData storageAddress)
+    ("glBufferSubData" @glBufferSubData storageAddress)
+    ("glCheckFramebufferStatus" @glCheckFramebufferStatus storageAddress)
+    ("glClearDepthf" @glClearDepthf storageAddress)
+    ("glCompileShader" @glCompileShader storageAddress)
+    ("glCompressedTexImage2D" @glCompressedTexImage2D storageAddress)
+    ("glCompressedTexSubImage2D" @glCompressedTexSubImage2D storageAddress)
+    ("glCreateProgram" @glCreateProgram storageAddress)
+    ("glCreateShader" @glCreateShader storageAddress)
+    ("glDeleteBuffers" @glDeleteBuffers storageAddress)
+    ("glDeleteFramebuffers" @glDeleteFramebuffers storageAddress)
+    ("glDeleteProgram" @glDeleteProgram storageAddress)
+    ("glDeleteRenderbuffers" @glDeleteRenderbuffers storageAddress)
+    ("glDeleteShader" @glDeleteShader storageAddress)
+    ("glDepthRangef" @glDepthRangef storageAddress)
+    ("glDetachShader" @glDetachShader storageAddress)
+    ("glDisableVertexAttribArray" @glDisableVertexAttribArray storageAddress)
+    ("glEnableVertexAttribArray" @glEnableVertexAttribArray storageAddress)
+    ("glFramebufferRenderbuffer" @glFramebufferRenderbuffer storageAddress)
+    ("glFramebufferTexture2D" @glFramebufferTexture2D storageAddress)
+    ("glGenBuffers" @glGenBuffers storageAddress)
+    ("glGenerateMipmap" @glGenerateMipmap storageAddress)
+    ("glGenFramebuffers" @glGenFramebuffers storageAddress)
+    ("glGenRenderbuffers" @glGenRenderbuffers storageAddress)
+    ("glGetActiveAttrib" @glGetActiveAttrib storageAddress)
+    ("glGetActiveUniform" @glGetActiveUniform storageAddress)
+    ("glGetAttachedShaders" @glGetAttachedShaders storageAddress)
+    ("glGetAttribLocation" @glGetAttribLocation storageAddress)
+    ("glGetBufferParameteriv" @glGetBufferParameteriv storageAddress)
+    ("glGetFramebufferAttachmentParameteriv" @glGetFramebufferAttachmentParameteriv storageAddress)
+    ("glGetProgramiv" @glGetProgramiv storageAddress)
+    ("glGetProgramInfoLog" @glGetProgramInfoLog storageAddress)
+    ("glGetRenderbufferParameteriv" @glGetRenderbufferParameteriv storageAddress)
+    ("glGetShaderiv" @glGetShaderiv storageAddress)
+    ("glGetShaderInfoLog" @glGetShaderInfoLog storageAddress)
+    ("glGetShaderPrecisionFormat" @glGetShaderPrecisionFormat storageAddress)
+    ("glGetShaderSource" @glGetShaderSource storageAddress)
+    ("glGetUniformfv" @glGetUniformfv storageAddress)
+    ("glGetUniformiv" @glGetUniformiv storageAddress)
+    ("glGetUniformLocation" @glGetUniformLocation storageAddress)
+    ("glGetVertexAttribfv" @glGetVertexAttribfv storageAddress)
+    ("glGetVertexAttribiv" @glGetVertexAttribiv storageAddress)
+    ("glGetVertexAttribPointerv" @glGetVertexAttribPointerv storageAddress)
+    ("glIsBuffer" @glIsBuffer storageAddress)
+    ("glIsFramebuffer" @glIsFramebuffer storageAddress)
+    ("glIsProgram" @glIsProgram storageAddress)
+    ("glIsRenderbuffer" @glIsRenderbuffer storageAddress)
+    ("glIsShader" @glIsShader storageAddress)
+    ("glLinkProgram" @glLinkProgram storageAddress)
+    ("glReleaseShaderCompiler" @glReleaseShaderCompiler storageAddress)
+    ("glRenderbufferStorage" @glRenderbufferStorage storageAddress)
+    ("glSampleCoverage" @glSampleCoverage storageAddress)
+    ("glShaderBinary" @glShaderBinary storageAddress)
+    ("glShaderSource" @glShaderSource storageAddress)
+    ("glStencilFuncSeparate" @glStencilFuncSeparate storageAddress)
+    ("glStencilMaskSeparate" @glStencilMaskSeparate storageAddress)
+    ("glStencilOpSeparate" @glStencilOpSeparate storageAddress)
+    ("glUniform1f" @glUniform1f storageAddress)
+    ("glUniform1fv" @glUniform1fv storageAddress)
+    ("glUniform1i" @glUniform1i storageAddress)
+    ("glUniform1iv" @glUniform1iv storageAddress)
+    ("glUniform2f" @glUniform2f storageAddress)
+    ("glUniform2fv" @glUniform2fv storageAddress)
+    ("glUniform2i" @glUniform2i storageAddress)
+    ("glUniform2iv" @glUniform2iv storageAddress)
+    ("glUniform3f" @glUniform3f storageAddress)
+    ("glUniform3fv" @glUniform3fv storageAddress)
+    ("glUniform3i" @glUniform3i storageAddress)
+    ("glUniform3iv" @glUniform3iv storageAddress)
+    ("glUniform4f" @glUniform4f storageAddress)
+    ("glUniform4fv" @glUniform4fv storageAddress)
+    ("glUniform4i" @glUniform4i storageAddress)
+    ("glUniform4iv" @glUniform4iv storageAddress)
+    ("glUniformMatrix2fv" @glUniformMatrix2fv storageAddress)
+    ("glUniformMatrix3fv" @glUniformMatrix3fv storageAddress)
+    ("glUniformMatrix4fv" @glUniformMatrix4fv storageAddress)
+    ("glUseProgram" @glUseProgram storageAddress)
+    ("glValidateProgram" @glValidateProgram storageAddress)
+    ("glVertexAttrib1f" @glVertexAttrib1f storageAddress)
+    ("glVertexAttrib1fv" @glVertexAttrib1fv storageAddress)
+    ("glVertexAttrib2f" @glVertexAttrib2f storageAddress)
+    ("glVertexAttrib2fv" @glVertexAttrib2fv storageAddress)
+    ("glVertexAttrib3f" @glVertexAttrib3f storageAddress)
+    ("glVertexAttrib3fv" @glVertexAttrib3fv storageAddress)
+    ("glVertexAttrib4f" @glVertexAttrib4f storageAddress)
+    ("glVertexAttrib4fv" @glVertexAttrib4fv storageAddress)
+    ("glVertexAttribPointer" @glVertexAttribPointer storageAddress)
+  );
+
+  procedureDescriptors fieldCount dynamic [
+    descriptor: i @procedureDescriptors @;
+    procPointer: 1 @descriptor @ Natx Ref cast;
+    0 descriptor @ wglGetProcAddress @procPointer set
+    [@procPointer Natx cast 0nx = not] "loadProcedures error" assert
+  ] times
+
+  TRUE
+] func;
+
+{
+  texture: GLenum;
+} () {} [
+  texture:;
+] "glActiveTexture_func" exportFunction
+glActiveTexture: 0nx @glActiveTexture_func cast;
+
+{
+  program: GLuint;
+  shader: GLuint;
+} () {} [
+  program:;
+  shader:;
+] "glAttachShader_func" exportFunction
+glAttachShader: 0nx @glAttachShader_func cast;
+
+{
+  program: GLuint;
+  index: GLuint;
+  name: Text;
+} () {} [
+  program:;
+  index:;
+  name:;
+] "glBindAttribLocation_func" exportFunction
+glBindAttribLocation: 0nx @glBindAttribLocation_func cast;
+
+{
+  target: GLenum;
+  buffer: GLuint;
+} () {} [
+  target:;
+  buffer:;
+] "glBindBuffer_func" exportFunction
+glBindBuffer: 0nx @glBindBuffer_func cast;
+
+{
+  target: GLenum;
+  framebuffer: GLuint;
+} () {} [
+  target:;
+  framebuffer:;
+] "glBindFramebuffer_func" exportFunction
+glBindFramebuffer: 0nx @glBindFramebuffer_func cast;
+
+{
+  target: GLenum;
+  renderbuffer: GLuint;
+} () {} [
+  target:;
+  renderbuffer:;
+] "glBindRenderbuffer_func" exportFunction
+glBindRenderbuffer: 0nx @glBindRenderbuffer_func cast;
+
+{
+  red: GLfloat;
+  green: GLfloat;
+  blue: GLfloat;
+  alpha: GLfloat;
+} () {} [
+  red: ;
+  green:;
+  blue:;
+  alpha:;
+] "glBlendColor_func" exportFunction
+glBlendColor: 0nx @glBlendColor_func cast;
+
+{
+  mode: GLenum;
+} () {} [
+  mode:;
+] "glBlendEquation_func" exportFunction
+glBlendEquation: 0nx @glBlendEquation_func cast;
+
+{
+  modeRGB: GLenum;
+  modeAlpha: GLenum;
+} () {} [
+  modeRGB:;
+  modeAlpha:;
+] "glBlendEquationSeparate_func" exportFunction
+glBlendEquationSeparate: 0nx @glBlendEquationSeparate_func cast;
+
+{
+  sfactorRGB: GLenum;
+  dfactorRGB: GLenum;
+  sfactorAlpha: GLenum;
+  dfactorAlpha: GLenum;
+} () {} [
+  sfactorRGB:;
+  dfactorRGB:;
+  sfactorAlpha:;
+  dfactorAlpha:;
+] "glBlendFuncSeparate_func" exportFunction
+glBlendFuncSeparate: 0nx @glBlendFuncSeparate_func cast;
+
+{
+  target: GLenum;
+  size: GLsizeiptr;
+  data: Natx;
+  usage: GLenum;
+} () {} [
+  target:;
+  size:;
+  data:;
+  usage:;
+] "glBufferData_func" exportFunction
+glBufferData: 0nx @glBufferData_func cast;
+
+{
+  target: GLenum;
+  offset: GLintptr;
+  size: GLsizeiptr;
+  data: Natx;
+} () {} [
+  target:;
+  offset:;
+  size:;
+  data:;
+] "glBufferSubData_func" exportFunction
+glBufferSubData: 0nx @glBufferSubData_func cast;
+
+{
+  target: GLenum;
+} GLenum {} [
+  target:;
+  GLenum
+] "glCheckFramebufferStatus_func" exportFunction
+glCheckFramebufferStatus: 0nx @glCheckFramebufferStatus_func cast;
+
+{
+  d: GLfloat;
+} () {} [
+  d:;
+] "glClearDepthf_func" exportFunction
+glClearDepthf: 0nx @glClearDepthf_func cast;
+
+{
+  shader: GLuint;
+} () {} [
+  shader:;
+] "glCompileShader_func" exportFunction
+glCompileShader: 0nx @glCompileShader_func cast;
+
+{
+  target: GLenum;
+  level: GLint;
+  internalformat: GLenum;
+  width: GLsizei;
+  height: GLsizei;
+  border: GLint;
+  imageSize: GLsizei;
+  data: Natx;
+} () {} [
+  target:;
+  level:;
+  internalformat:;
+  width:;
+  height:;
+  border:;
+  imageSize:;
+  data:;
+] "glCompressedTexImage2D_func" exportFunction
+glCompressedTexImage2D: 0nx @glCompressedTexImage2D_func cast;
+
+{
+  target: GLenum;
+  level: GLint;
+  xoffset: GLint;
+  yoffset: GLint;
+  width: GLsizei;
+  height: GLsizei;
+  format: GLenum;
+  imageSize: GLsizei;
+  data: Natx;
+} () {} [
+  target:;
+  level:;
+  xoffset:;
+  yoffset:;
+  width:;
+  height:;
+  format:;
+  imageSize:;
+  data:;
+] "glCompressedTexSubImage2D_func" exportFunction
+glCompressedTexSubImage2D: 0nx @glCompressedTexSubImage2D_func cast;
+
+{} GLuint {} [GLuint] "glCreateProgram_func" exportFunction
+glCreateProgram: 0nx @glCreateProgram_func cast;
+
+{
+  type: GLenum;
+} GLuint {} [
+  type:;
+  GLuint
+] "glCreateShader_func" exportFunction
+glCreateShader: 0nx @glCreateShader_func cast;
+
+{
+  n: GLsizei;
+  buffers: GLuint Cref;
+} () {} [
+  n:;
+  buffers:;
+] "glDeleteBuffers_func" exportFunction
+glDeleteBuffers: 0nx @glDeleteBuffers_func cast;
+
+{
+  n: GLsizei;
+  framebuffers: GLuint Cref;
+} () {} [
+  n:;
+  framebuffers:;
+] "glDeleteFramebuffers_func" exportFunction
+glDeleteFramebuffers: 0nx @glDeleteFramebuffers_func cast;
+
+{
+  program: GLuint;
+} () {} [
+  program:;
+] "glDeleteProgram_func" exportFunction
+glDeleteProgram: 0nx @glDeleteProgram_func cast;
+
+{
+  n: GLsizei;
+  renderbuffers: GLuint Cref;
+} () {} [
+  n:;
+  renderbuffers:;
+] "glDeleteRenderbuffers_func" exportFunction
+glDeleteRenderbuffers: 0nx @glDeleteRenderbuffers_func cast;
+
+{
+  shader: GLuint;
+} () {} [
+  shader:;
+] "glDeleteShader_func" exportFunction
+glDeleteShader: 0nx @glDeleteShader_func cast;
+
+{
+  n: GLfloat;
+  f: GLfloat;
+} () {} [
+  n:;
+  f:;
+] "glDepthRangef_func" exportFunction
+glDepthRangef: 0nx @glDepthRangef_func cast;
+
+{
+  program: GLuint;
+  shader: GLuint;
+} () {} [
+  program:;
+  shader:;
+] "glDetachShader_func" exportFunction
+glDetachShader: 0nx @glDetachShader_func cast;
+
+{
+  index: GLuint;
+} () {} [
+  index:;
+] "glDisableVertexAttribArray_func" exportFunction
+glDisableVertexAttribArray: 0nx @glDisableVertexAttribArray_func cast;
+
+{
+  index: GLuint;
+} () {} [
+  index:;
+] "glEnableVertexAttribArray_func" exportFunction
+glEnableVertexAttribArray: 0nx @glEnableVertexAttribArray_func cast;
+
+{
+  target: GLenum;
+  attachment: GLenum;
+  renderbuffertarget: GLenum;
+  renderbuffer: GLuint;
+} () {} [
+  target:;
+  attachment:;
+  renderbuffertarget:;
+  renderbuffer:;
+] "glFramebufferRenderbuffer_func" exportFunction
+glFramebufferRenderbuffer: 0nx @glFramebufferRenderbuffer_func cast;
+
+{
+  target: GLenum;
+  attachment: GLenum;
+  textarget: GLenum;
+  texture: GLuint;
+  level: GLint;
+} () {} [
+  target:;
+  attachment:;
+  textarget:;
+  texture:;
+  level:;
+] "glFramebufferTexture2D_func" exportFunction
+glFramebufferTexture2D: 0nx @glFramebufferTexture2D_func cast;
+
+{
+  n: GLsizei;
+  buffers: GLuint Ref;
+} () {} [
+  n:;
+  buffers:;
+] "glGenBuffers_func" exportFunction
+glGenBuffers: 0nx @glGenBuffers_func cast;
+
+{
+  target: GLenum;
+} () {} [
+  target:;
+] "glGenerateMipmap_func" exportFunction
+glGenerateMipmap: 0nx @glGenerateMipmap_func cast;
+
+{
+  n: GLsizei;
+  framebuffers: GLuint Ref;
+} () {} [
+  n:;
+  framebuffers:;
+] "glGenFramebuffers_func" exportFunction
+glGenFramebuffers: 0nx @glGenFramebuffers_func cast;
+
+{
+  n: GLsizei;
+  renderbuffers: GLuint Ref;
+} () {} [
+  n:;
+  renderbuffers:;
+] "glGenRenderbuffers_func" exportFunction
+glGenRenderbuffers: 0nx @glGenRenderbuffers_func cast;
+
+{
+  program: GLuint;
+  index: GLuint;
+  bufSize: GLsizei;
+  length: GLsizei Ref;
+  size: GLint Ref;
+  type: GLenum Ref;
+  name: Text;
+} () {} [
+  program:;
+  index:;
+  bufSize:;
+  length:;
+  size:;
+  type:;
+  name:;
+] "glGetActiveAttrib_func" exportFunction
+glGetActiveAttrib: 0nx @glGetActiveAttrib_func cast;
+
+{
+  program: GLuint;
+  index: GLuint;
+  bufSize: GLsizei;
+  length: GLsizei Ref;
+  size: GLint Ref;
+  type: GLenum Ref;
+  name: Text;
+} () {} [
+  program:;
+  index:;
+  bufSize:;
+  length:;
+  size:;
+  type:;
+  name:;
+] "glGetActiveUniform_func" exportFunction
+glGetActiveUniform: 0nx @glGetActiveUniform_func cast;
+
+{
+  program: GLuint;
+  maxCount: GLsizei;
+  count: GLsizei Ref;
+  shaders: GLuint Ref;
+} () {} [
+  program:;
+  maxCount:;
+  count:;
+  shaders:;
+] "glGetAttachedShaders_func" exportFunction
+glGetAttachedShaders: 0nx @glGetAttachedShaders_func cast;
+
+{
+  program: GLuint;
+  name: Text;
+} GLint {} [
+  program:;
+  name:;
+  GLint
+] "glGetAttribLocation_func" exportFunction
+glGetAttribLocation: 0nx @glGetAttribLocation_func cast;
+
+{
+  target: GLenum;
+  pname: GLenum;
+  params: GLint Ref;
+} () {} [
+  target:;
+  pname:;
+  params:;
+] "glGetBufferParameteriv_func" exportFunction
+glGetBufferParameteriv: 0nx @glGetBufferParameteriv_func cast;
+
+{
+  target: GLenum;
+  attachment: GLenum;
+  pname: GLenum;
+  params: GLint Ref;
+} () {} [
+  target:;
+  attachment:;
+  pname:;
+  params:;
+] "glGetFramebufferAttachmentParameteriv_func" exportFunction
+glGetFramebufferAttachmentParameteriv: 0nx @glGetFramebufferAttachmentParameteriv_func cast;
+
+{
+  program: GLuint;
+  pname: GLenum;
+  params: GLint Ref;
+} () {} [
+  program:;
+  pname:;
+  params:;
+] "glGetProgramiv_func" exportFunction
+glGetProgramiv: 0nx @glGetProgramiv_func cast;
+
+{
+  program: GLuint;
+  bufSize: GLsizei;
+  length: GLsizei Ref;
+  infoLog: Text;
+} () {} [
+  program:;
+  bufSize:;
+  length:;
+  infoLog:;
+] "glGetProgramInfoLog_func" exportFunction
+glGetProgramInfoLog: 0nx @glGetProgramInfoLog_func cast;
+
+{
+  target: GLenum;
+  pname: GLenum;
+  params: GLint Ref;
+} () {} [
+  target:;
+  pname:;
+  params:;
+] "glGetRenderbufferParameteriv_func" exportFunction
+glGetRenderbufferParameteriv: 0nx @glGetRenderbufferParameteriv_func cast;
+
+{
+  shader: GLuint;
+  pname: GLenum;
+  params: GLint Ref;
+} () {} [
+  shader:;
+  pname:;
+  params:;
+] "glGetShaderiv_func" exportFunction
+glGetShaderiv: 0nx @glGetShaderiv_func cast;
+
+{
+  shader: GLuint;
+  bufSize: GLsizei;
+  length: GLsizei Ref;
+  infoLog: Text;
+} () {} [
+  shader:;
+  bufSize:;
+  length:;
+  infoLog:;
+] "glGetShaderInfoLog_func" exportFunction
+glGetShaderInfoLog: 0nx @glGetShaderInfoLog_func cast;
+
+{
+  shadertype: GLenum;
+  precisiontype: GLenum;
+  range: GLint Ref;
+  precision: GLint Ref;
+} () {} [
+  shadertype:;
+  precisiontype:;
+  range:;
+  precision:;
+] "glGetShaderPrecisionFormat_func" exportFunction
+glGetShaderPrecisionFormat: 0nx @glGetShaderPrecisionFormat_func cast;
+
+{
+  shader: GLuint;
+  bufSize: GLsizei;
+  length: GLsizei Ref;
+  source: Text;
+} () {} [
+  shader:;
+  bufSize:;
+  length:;
+  source:;
+] "glGetShaderSource_func" exportFunction
+glGetShaderSource: 0nx @glGetShaderSource_func cast;
+
+{
+  program: GLuint;
+  location: GLint;
+  params: GLfloat Ref;
+} () {} [
+  program:;
+  location:;
+  params:;
+] "glGetUniformfv_func" exportFunction
+glGetUniformfv: 0nx @glGetUniformfv_func cast;
+
+{
+  program: GLuint;
+  location: GLint;
+  params: GLint Ref;
+} () {} [
+  program:;
+  location:;
+  params:;
+] "glGetUniformiv_func" exportFunction
+glGetUniformiv: 0nx @glGetUniformiv_func cast;
+
+{
+  program: GLuint;
+  name: Natx;
+} GLint {} [
+  program:;
+  name:;
+  GLint
+] "glGetUniformLocation_func" exportFunction
+glGetUniformLocation: 0nx @glGetUniformLocation_func cast;
+
+{
+  index: GLuint;
+  pname: GLenum;
+  params: GLfloat Ref;
+} () {} [
+  index:;
+  pname:;
+  params:;
+] "glGetVertexAttribfv_func" exportFunction
+glGetVertexAttribfv: 0nx @glGetVertexAttribfv_func cast;
+
+{
+  index: GLuint;
+  pname: GLenum;
+  params: GLint Ref;
+} () {} [
+  index:;
+  pname:;
+  params:;
+] "glGetVertexAttribiv_func" exportFunction
+glGetVertexAttribiv: 0nx @glGetVertexAttribiv_func cast;
+
+{
+  index: GLuint;
+  pname: GLenum;
+  pointer: Natx Ref;
+} () {} [
+  index:;
+  pname:;
+  pointer:;
+] "glGetVertexAttribPointerv_func" exportFunction
+glGetVertexAttribPointerv: 0nx @glGetVertexAttribPointerv_func cast;
+
+{
+  buffer: GLuint;
+} GLboolean {} [
+  buffer:;
+  GLboolean
+] "glIsBuffer_func" exportFunction
+glIsBuffer: 0nx @glIsBuffer_func cast;
+
+{
+  framebuffer: GLuint;
+} GLboolean {} [
+  framebuffer:;
+  GLboolean
+] "glIsFramebuffer_func" exportFunction
+glIsFramebuffer: 0nx @glIsFramebuffer_func cast;
+
+{
+  program: GLuint;
+} GLboolean {} [
+  program:;
+  GLboolean
+] "glIsProgram_func" exportFunction
+glIsProgram: 0nx @glIsProgram_func cast;
+
+{
+  renderbuffer: GLuint;
+} GLboolean {} [
+  renderbuffer:;
+  GLboolean
+] "glIsRenderbuffer_func" exportFunction
+glIsRenderbuffer: 0nx @glIsRenderbuffer_func cast;
+
+{
+  shader: GLuint;
+} GLboolean {} [
+  shader:;
+  GLboolean
+] "glIsShader_func" exportFunction
+glIsShader: 0nx @glIsShader_func cast;
+
+{
+  program: GLuint;
+} () {} [
+  program:;
+] "glLinkProgram_func" exportFunction
+glLinkProgram: 0nx @glLinkProgram_func cast;
+
+{} () {} [] "glReleaseShaderCompiler_func" exportFunction
+glReleaseShaderCompiler: 0nx @glReleaseShaderCompiler_func cast;
+
+{
+  target: GLenum;
+  internalformat: GLenum;
+  width: GLsizei;
+  height: GLsizei;
+} () {} [
+  target:;
+  internalformat:;
+  width:;
+  height:;
+] "glRenderbufferStorage_func" exportFunction
+glRenderbufferStorage: 0nx @glRenderbufferStorage_func cast;
+
+{
+  value: GLfloat;
+  invert: GLboolean;
+} () {} [
+  value:;
+  invert:;
+] "glSampleCoverage_func" exportFunction
+glSampleCoverage: 0nx @glSampleCoverage_func cast;
+
+{
+  count: GLsizei;
+  shaders: GLuint Cref;
+  binaryformat: GLenum;
+  binary: Natx;
+  length: GLsizei;
+} () {} [
+  count:;
+  shaders:;
+  binaryformat:;
+  binary:;
+  length:;
+] "glShaderBinary_func" exportFunction
+glShaderBinary: 0nx @glShaderBinary_func cast;
+
+{
+  shader: GLuint;
+  count: GLsizei;
+  string: Text Cref;
+  length: GLint Cref;
+} () {} [
+  shader:;
+  count:;
+  string:;
+  length:;
+] "glShaderSource_func" exportFunction
+glShaderSource: 0nx @glShaderSource_func cast;
+
+{
+  face: GLenum;
+  func: GLenum;
+  Ref: GLint;
+  mask: GLuint;
+} () {} [
+  face:;
+  func:;
+  Ref:;
+  mask:;
+] "glStencilFuncSeparate_func" exportFunction
+glStencilFuncSeparate: 0nx @glStencilFuncSeparate_func cast;
+
+{
+  face: GLenum;
+  mask: GLuint;
+} () {} [
+  face:;
+  mask:;
+] "glStencilMaskSeparate_func" exportFunction
+glStencilMaskSeparate: 0nx @glStencilMaskSeparate_func cast;
+
+{
+  face: GLenum;
+  sfail: GLenum;
+  dpfail: GLenum;
+  dppass: GLenum;
+} () {} [
+  face:;
+  sfail:;
+  dpfail:;
+  dppass:;
+] "glStencilOpSeparate_func" exportFunction
+glStencilOpSeparate: 0nx @glStencilOpSeparate_func cast;
+
+{
+  location: GLint;
+  v0: GLfloat;
+} () {} [
+  location:;
+  v0:;
+] "glUniform1f_func" exportFunction
+glUniform1f: 0nx @glUniform1f_func cast;
+
+{
+  location: GLint;
+  count: GLsizei;
+  value: GLfloat Cref;
+} () {} [
+  location:;
+  count:;
+  value:;
+] "glUniform1fv_func" exportFunction
+glUniform1fv: 0nx @glUniform1fv_func cast;
+
+{
+  location: GLint;
+  v0: GLint;
+} () {} [
+  location:;
+  v0:;
+] "glUniform1i_func" exportFunction
+glUniform1i: 0nx @glUniform1i_func cast;
+
+{
+  location: GLint;
+  count: GLsizei;
+  value: GLint Cref;
+} () {} [
+  location:;
+  count:;
+  value:;
+] "glUniform1iv_func" exportFunction
+glUniform1iv: 0nx @glUniform1iv_func cast;
+
+{
+  location: GLint;
+  v0: GLfloat;
+  v1: GLfloat;
+} () {} [
+  location:;
+  v0:;
+  v1:;
+] "glUniform2f_func" exportFunction
+glUniform2f: 0nx @glUniform2f_func cast;
+
+{
+  location: GLint;
+  count: GLsizei;
+  value: GLfloat Cref;
+} () {} [
+  location:;
+  count:;
+  value:;
+] "glUniform2fv_func" exportFunction
+glUniform2fv: 0nx @glUniform2fv_func cast;
+
+{
+  location: GLint;
+  v0: GLint;
+  v1: GLint;
+} () {} [
+  location:;
+  v0:;
+  v1:;
+] "glUniform2i_func" exportFunction
+glUniform2i: 0nx @glUniform2i_func cast;
+
+{
+  location: GLint;
+  count: GLsizei;
+  value: GLint Cref;
+} () {} [
+  location:;
+  count:;
+  value:;
+] "glUniform2iv_func" exportFunction
+glUniform2iv: 0nx @glUniform2iv_func cast;
+
+{
+  location: GLint;
+  v0: GLfloat;
+  v1: GLfloat;
+  v2: GLfloat;
+} () {} [
+  location:;
+  v0:;
+  v1:;
+  v2:;
+] "glUniform3f_func" exportFunction
+glUniform3f: 0nx @glUniform3f_func cast;
+
+{
+  location: GLint;
+  count: GLsizei;
+  value: GLfloat Cref;
+} () {} [
+  location:;
+  count:;
+  value:;
+] "glUniform3fv_func" exportFunction
+glUniform3fv: 0nx @glUniform3fv_func cast;
+
+{
+  location: GLint;
+  v0: GLint;
+  v1: GLint;
+  v2: GLint;
+} () {} [
+  location:;
+  v0:;
+  v1:;
+  v2:;
+] "glUniform3i_func" exportFunction
+glUniform3i: 0nx @glUniform3i_func cast;
+
+{
+  location: GLint;
+  count: GLsizei;
+  value: GLint Cref;
+} () {} [
+  location:;
+  count:;
+  value:;
+] "glUniform3iv_func" exportFunction
+glUniform3iv: 0nx @glUniform3iv_func cast;
+
+{
+  location: GLint;
+  v0: GLfloat;
+  v1: GLfloat;
+  v2: GLfloat;
+  v3: GLfloat;
+} () {} [
+  location:;
+  v0:;
+  v1:;
+  v2:;
+  v3:;
+] "glUniform4f_func" exportFunction
+glUniform4f: 0nx @glUniform4f_func cast;
+
+{
+  location: GLint;
+  count: GLsizei;
+  value: GLfloat Cref;
+} () {} [
+  location:;
+  count:;
+  value:;
+] "glUniform4fv_func" exportFunction
+glUniform4fv: 0nx @glUniform4fv_func cast;
+
+{
+  location: GLint;
+  v0: GLint;
+  v1: GLint;
+  v2: GLint;
+  v3: GLint;
+} () {} [
+  location:;
+  v0:;
+  v1:;
+  v2:;
+  v3:;
+] "glUniform4i_func" exportFunction
+glUniform4i: 0nx @glUniform4i_func cast;
+
+{
+  location: GLint;
+  count: GLsizei;
+  value: GLint Cref;
+} () {} [
+  location:;
+  count:;
+  value:;
+] "glUniform4iv_func" exportFunction
+glUniform4iv: 0nx @glUniform4iv_func cast;
+
+{
+  location: GLint;
+  count: GLsizei;
+  transpose: GLboolean;
+  value: GLfloat Cref;
+} () {} [
+  location:;
+  count:;
+  transpose:;
+  value:;
+] "glUniformMatrix2fv_func" exportFunction
+glUniformMatrix2fv: 0nx @glUniformMatrix2fv_func cast;
+
+{
+  location: GLint;
+  count: GLsizei;
+  transpose: GLboolean;
+  value: GLfloat Cref;
+} () {} [
+  location:;
+  count:;
+  transpose:;
+  value:;
+] "glUniformMatrix3fv_func" exportFunction
+glUniformMatrix3fv: 0nx @glUniformMatrix3fv_func cast;
+
+{
+  location: GLint;
+  count: GLsizei;
+  transpose: GLboolean;
+  value: GLfloat Cref;
+} () {} [
+  location:;
+  count:;
+  transpose:;
+  value:;
+] "glUniformMatrix4fv_func" exportFunction
+glUniformMatrix4fv: 0nx @glUniformMatrix4fv_func cast;
+
+{
+  program: GLuint;
+} () {} [
+  program:;
+] "glUseProgram_func" exportFunction
+glUseProgram: 0nx @glUseProgram_func cast;
+
+{
+  program: GLuint;
+} () {} [
+  program:;
+] "glValidateProgram_func" exportFunction
+glValidateProgram: 0nx @glValidateProgram_func cast;
+
+{
+  index: GLuint;
+  x: GLfloat;
+} () {} [
+  index:;
+  x:;
+] "glVertexAttrib1f_func" exportFunction
+glVertexAttrib1f: 0nx @glVertexAttrib1f_func cast;
+
+{
+  index: GLuint;
+  v: GLfloat Cref;
+} () {} [
+  index:;
+  v:;
+] "glVertexAttrib1fv_func" exportFunction
+glVertexAttrib1fv: 0nx @glVertexAttrib1fv_func cast;
+
+{
+  index: GLuint;
+  x: GLfloat;
+  y: GLfloat;
+} () {} [
+  index:;
+  x:;
+  y:;
+] "glVertexAttrib2f_func" exportFunction
+glVertexAttrib2f: 0nx @glVertexAttrib2f_func cast;
+
+{
+  index: GLuint;
+  v: GLfloat Cref;
+} () {} [
+  index:;
+  v:;
+] "glVertexAttrib2fv_func" exportFunction
+glVertexAttrib2fv: 0nx @glVertexAttrib2fv_func cast;
+
+{
+  index: GLuint;
+  x: GLfloat;
+  y: GLfloat;
+  z: GLfloat;
+} () {} [
+  index:;
+  x:;
+  y:;
+  z:;
+] "glVertexAttrib3f_func" exportFunction
+glVertexAttrib3f: 0nx @glVertexAttrib3f_func cast;
+
+{
+  index: GLuint;
+  v: GLfloat Cref;
+} () {} [
+  index:;
+  v:;
+] "glVertexAttrib3fv_func" exportFunction
+glVertexAttrib3fv: 0nx @glVertexAttrib3fv_func cast;
+
+{
+  index: GLuint;
+  x: GLfloat;
+  y: GLfloat;
+  z: GLfloat;
+  w: GLfloat;
+} () {} [
+  index:;
+  x:;
+  y:;
+  z:;
+  w:;
+] "glVertexAttrib4f_func" exportFunction
+glVertexAttrib4f: 0nx @glVertexAttrib4f_func cast;
+
+{
+  index: GLuint;
+  v: GLfloat Cref;
+} () {} [
+  index:;
+  v:;
+] "glVertexAttrib4fv_func" exportFunction
+glVertexAttrib4fv: 0nx @glVertexAttrib4fv_func cast;
+
+{
+  index: GLuint;
+  size: GLint;
+  type: GLenum;
+  normalized: GLboolean;
+  stride: GLsizei;
+  pointer: Natx;
+} () {} [
+  index:;
+  size:;
+  type:;
+  normalized:;
+  stride:;
+  pointer:;
+] "glVertexAttribPointer_func" exportFunction
+glVertexAttribPointer: 0nx @glVertexAttribPointer_func cast;

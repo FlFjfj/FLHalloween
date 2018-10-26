@@ -1,0 +1,172 @@
+"Model" module
+
+"array" useModule
+"control" useModule
+"hashTable" useModule
+"string" useModule
+
+"algebra" useModule
+"arrayInputStream" useModule
+
+Model: [{
+  virtual NEXT_VERTEX: (1n32 2n32 0n32);
+  virtual PREVIOUS_VERTEX: (2n32 0n32 1n32);
+
+  MaterialInfo: [{
+    triangleOffset: Nat32;
+    triangleCount: Nat32;
+    segmentOffset: Nat32;
+    segmentCount: Nat32;
+  }] func;
+
+  NodeInfo: [{
+    name: String;
+    position: Real32 3 Vector;
+    orientation: Real32 Quaternion;
+    materials: MaterialInfo Array;
+    properties: String String HashTable;
+  }] func;
+
+  Trigangle: [{
+    vertexIndexes: Nat16 3 Vector;
+  }];
+
+  Vertex: [{
+    position: Real32 3 Vector;
+    textureCoordinate0: Real32 2 Vector;
+    normal: Int16 3 Vector;
+    tangent0: Int16 3 Vector;
+    tangent1: Int16 3 Vector;
+  }] func;
+
+  vitrual IS_MODEL: ();
+
+  nodeInfos: NodeInfo Array;
+  triangles: Triangle Array;
+  vertexes: Vertex Array;
+  nodeIndexes: String Nat32 HashTable;
+
+  getNodeInfo: [
+    name: toString;
+    result: @name nodeIndexes.find;
+    result.success ["Invalid node name" failProc] when
+    result.value
+  ] func;
+}] func;
+
+ModelInternal: {
+  FullVertex: [{
+    position: Real32 3 Vector;
+    textureCoordinate0: Real32 2 Vector;
+    normal: Real32 3 Vector;
+    tangent0: Real32 3 Vector;
+    tangent1: Real32 3 Vector;
+  }] func;
+
+  FullTriangle: [{
+    vertexes: FullVertex Array;
+    normal: Real32 3 Vector;
+    tangent0: Real32 3 Vector;
+    tangent1: Real32 3 Vector;
+    smoothGroup: Nat16;
+  }] func;
+
+  ccw: [
+    v0:v1:;;
+    0 v0 @ 1 v1 @ *
+    1 v0 @ 0 v1 @ * -
+  ] func;
+
+  processTangents: [
+    tangentTriangleIndexes: Nat32 Array;
+    fulltrinangles: triangleIndexes:;;
+    [i: 0;] [i triangleIndex fieldCount <] [i 1 + @i set] [
+      t0: triangleIndex atArray;
+      0xFFFFFFFF t0 = ~ [
+        1 tangentTriangleIndexes.resize
+        t0 0 tangentTriangleIndexes atArray set
+        triangle0: t0 2 rshift fullTriangles atArray;
+        vertex0: t0 3 & triangle0.vertexes atArray;
+        swapped0: triangle0.tangent0 triangle0.tangent1 cross triangle0.normal dot 0.0r32 <;
+
+        t0 3 & NEXT_VERTEX     @ triangle0.vertexes @ .position - vertex0.position unit
+        t0 3 & PREVIOUS_VERTEX @ triangle0.vertexes @ .position - vertex0.position unit
+        dot acos
+        angle0:;
+
+        triangle0.tangent0 angle0 * vertex0.@tangent0 set
+        triangle0.tangent1 angle0 * vertex0.@tangent1 set
+        [j: i + 1;] [i triangleIndex fieldCount <] [j 1 + @j set] [
+          t0: triangleIndex atArray;
+          0xFFFFFFFF t0 = ~ [
+            triangle1: t1 2 rshift fullTriangles atArray;
+            vertex1: t1 3 & triangle1.vertexes atArray;
+            swapped1: triangle1.tangent0 triangle1.tangent1 cross triangle1.normal dot 0.0r32 <;
+
+            0 vertex1.textureCoordinate0 @ - 0 vertex0.textureCoordinate0 @ abs 0.0002r32 <
+            1 vertex1.textureCoordinate0 @ - 1 vertex0.textureCoordinate0 @ abs 0.0002r32 < and
+            swapped1 swapped0 = and [
+              j triangleIndexes @ 0xFFFFFFFF set
+              t1 tangentTriangleIndexes.pushBack
+
+              t1 3 & NEXT_VERTEX     @ triangle1.vertexes @ .position - vertex1.position unit
+              t1 3 & PREVIOUS_VERTEX @ triangle1.vertexes @ .position - vertex1.position unit
+              dot acos
+              angle1:;
+
+              triangle1.tangent0 angle1 * vertex1.@tangent0 set
+              triangle1.tangent1 angle1 * vertex1.@tangent1 set
+            ] when
+          ] when
+        ] for
+
+        vertex0.tangent0 unit vertex0.@tangent0 set
+        vertex0.tangent1 unit vertex0.@tangent1 set
+        tangentTriangleIndexes [
+          triangle1: t1 2 rshift fullTriangles atArray;
+          vertex1: t1 3 & triangle1.vertexes atArray;
+          vertex0.tangent0 vertex1.@tangent0 set
+          vertex0.tangent1 vertex1.@tangent1 set
+        ] each
+      ] when
+    ] for
+  ] func;
+};
+
+makeModel: [
+  in: ArrayInputStream;
+  model: Model;
+  Nat32 in.read @model.@nodes.resize
+  model.nodes fieldCount [
+    node: i @model.@nodes @;
+    @node.@name        @in.read8
+    @node.@position    @in.readTo
+    @node.@orientation @in.readTo
+    Nat8 @in.read @node.@materials.resize
+    node.materials fieldCount [
+      material: i @node.@materials @;
+      @material.@triangleOffset @in.readTo
+      @material.@triangleCount  @in.readTo
+      @material.@segmentOffset  @in.readTo
+      @material.@segmentCount   @in.readTo
+    ] times
+
+    propertyCount: Nat8 @in.read;
+    propertyCount Int8 cast Int32 cast [
+      name: String;
+      value: String;
+      @name @in.read8
+      @value @in.read8
+      name value @node.@properties.insert
+    ] times
+
+    node.name i @nodeIndexes.insert
+  ] times
+
+  InputVertex: [{
+    position: Real32 3 Vector;
+    textureCoordinate: Real32 2 Vector;
+  }] func;
+
+  inputVertexes: InputVertex Array;
+] func;

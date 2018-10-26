@@ -1,0 +1,215 @@
+"winapi" module
+
+"control" useModule
+
+{
+  CodePage: Nat32;
+  dwFlags: Nat32;
+  lpMultiByteStr: Natx;
+  cbMultiByte: Int32;
+  lpWideCharStr: Natx;
+  cchWideChar: Int32;
+} Int32 {} "MultiByteToWideChar" importFunction
+
+#[0i32 0nx 0i32 0nx 0n32 0n32] [0i32] "MultiByteToWideChar" import
+{
+  hInstance: Natx;
+  lpCursorName: Natx;
+} Natx {} "LoadCursorW" importFunction
+
+CREATESTRUCTW: [{
+  lpCreateParams: Natx;
+  hInstance: Natx;
+  hMenu: Natx;
+  hwndParent: Natx;
+  cy: Int32;
+  cx: Int32;
+  y: Int32;
+  x: Int32;
+  style: Int64;
+  lpszName: Natx;
+  lpszClass: Natx;
+  dwExStyle: Nat32;
+}] func;
+
+PIXELFORMATDESCRIPTOR: [{
+  nSize: Nat16;
+  nVersion: Nat16;
+  dwFlags: Nat32;
+  iPixelType: Nat8;
+  cColorBits: Nat8;
+  cRedBits: Nat8;
+  cRedShift: Nat8;
+  cGreenBits: Nat8;
+  cGreenShift: Nat8;
+  cBlueBits: Nat8;
+  cBlueShift: Nat8;
+  cAlphaBits: Nat8;
+  cAlphaShift: Nat8;
+  cAccumBits: Nat8;
+  cAccumRedBits: Nat8;
+  cAccumGreenBits:Nat8;
+  cAccumBlueBits: Nat8;
+  cAccumAlphaBits:Nat8;
+  cDepthBits: Nat8;
+  cStencilBits: Nat8;
+  cAuxBuffers: Nat8;
+  iLayerType: Nat8;
+  bReserved: Nat8;
+  dwLayerMask: Nat32;
+  dwVisibleMask: Nat32;
+  dwDamageMask: Nat32;
+}] func;
+
+HGLRC__: [{
+  unused: Int32;
+}] func;
+
+MSG: [{
+  hwnd: Natx;
+  message: Nat32;
+  wParam: Natx;
+  lParam: Natx;
+  time: Nat32;
+  pt: POINT;
+}] func;
+
+POINT: [{
+  x: Int32;
+  y: Int32;
+}] func;
+
+makePoint: [
+  point: POINT;
+  x:y: copy; copy;
+  x @point.@x set
+  y @point.@y set
+  point
+] func;
+
+CW_USEDEFAULT: [0x80000000n32 Int32 cast] func;
+CS_OWNDC: [0x0020n32] func;
+CP_UTF8: [65001n32] func;
+MB_ERR_INVALID_CHARS: [8n32] func;
+SW_MINIMIZE: [6i32] func;
+SW_SHOWDEFAULT: [10i32] func;
+IDC_ARROW: 32512nx;
+
+WS_MAXIMIZEBOX: [0x00010000n32] func;
+WS_MINIMIZEBOX: [0x00020000n32] func;
+WS_SIZEBOX: [0x00040000n32] func;
+WS_SYSMENU: [0x00080000n32] func;
+
+WM_NCCREATE: [0x0081n32] func;
+
+GWLP_USERDATA: [-21i32] func;
+
+PFD_DOUBLEBUFFER: [0x00000001n32] func;
+PFD_DRAW_TO_WINDOW: [0x00000004n32] func;
+PFD_SUPPORT_OPENGL: [0x00000020n32] func;
+PFD_TYPE_RGBA: [0n8] func;
+PFD_MAIN_PLANE: [0n8] func;
+
+WGL_DOUBLE_BUFFER_ARB: [8209n32] func;
+WGL_DRAW_TO_WINDOW_ARB: [8193n32] func;
+WGL_SUPPORT_OPENGL_ARB: [8208n32] func;
+WGL_PIXEL_TYPE_ARB: [8226n32] func;
+WGL_TYPE_RGBA_ARB: [8235n32] func;
+WGL_COLOR_BITS_ARB: [8212n32] func;
+WGL_DEPTH_BITS_ARB: [8226n32] func;
+
+PM_REMOVE: [0x0001n32] func;
+
+WM_MOVE: [0x0003n32] func;
+
+WM_SIZE: [0x0005n32] func;
+
+WM_SETFOCUS: [0x0007n32] func;
+
+WM_KILLFOCUS: [0x0008n32] func;
+
+WM_CLOSE: [0x0010n32] func;
+
+WM_KEYDOWN: [0x0100n32] func;
+
+WM_SYSKEYDOWN: [0x0104n32] func;
+
+WM_KEYUP: [0x0101n32] func;
+
+WM_SYSKEYUP: [0x0105n32] func;
+
+WM_CHAR: [0x0102n32] func;
+
+WM_LBUTTONDOWN: [0x0201n32] func;
+
+WM_LBUTTONUP: [0x0202n32] func;
+
+WM_MBUTTONDOWN: [0x0207n32] func;
+
+WM_MBUTTONUP: [0x0208n32] func;
+
+WM_RBUTTONDOWN: [0x0204n32] func;
+
+WM_RBUTTONUP: [0x0205n32] func;
+
+WM_MOUSEMOVE: [0x0200n32] func;
+
+WM_MOUSEWHEEL: [0x020An32] func;
+
+WM_NCCALCSIZE: [0x0083n32] func;
+
+WM_WINDOWPOSCHANGED: [0x0047n32] func;
+
+LOWORD: [Nat32 cast 0xFFFFn32 and] func;
+
+HIWORD: [Nat32 cast 16n32 rshift 0xFFFFn32 and] func;
+
+GET_X_PARAM: [LOWORD Int32 cast] func;
+
+GET_Y_PARAM: [HIWORD Int32 cast] func;
+
+GET_WHEEL_DELTA_WPARAM: [HIWORD Nat16 cast Int16 cast] func;
+
+S_OK: [0i32] func;
+S_FALSE: [1i32] func;
+
+{lpWndClass: Natx;} Nat16 {} "RegisterClassW" importFunction
+{} Nat32 {} "GetLastError" importFunction
+{
+  dwExStyle: Nat32;
+  lpClassName: Natx;
+  lpWindowName: Natx;
+  dwStyle: Nat32;
+  X: Int32;
+  Y: Int32;
+  nWidth: Int32;
+  nHeight: Int32;
+  hWndParent: Natx;
+  hMenu: Natx;
+  hInstance: Natx;
+  lpParam: Natx;
+} Natx {} "CreateWindowExW" importFunction
+{hWnd: Natx; nCmdShow: Int32;} Int32 {} "ShowWindow" importFunction
+{hWnd: Natx;} Int32 {} "UpdateWindow" importFunction
+{hWnd: Natx;} Int32 {} "DestroyWindow" importFunction
+{hWnd: Natx; nIndex: Int32;} Natx {} "GetWindowLongPtrW" importFunction
+{hWnd: Natx; nIndex: Int32; dwNewLong: Natx;} Natx {} "SetWindowLongPtrW" importFunction
+{hWnd: Natx; message: Nat32; data0: Natx; data1: Natx;} Intx {} "DefWindowProcW" importFunction
+{hWnd: Natx;} Natx {} "GetDC" importFunction
+{hdc: Natx; ppfd: PIXELFORMATDESCRIPTOR Cref;} Int32 {} "ChoosePixelFormat" importFunction
+{hdc: Natx; format: Int32; ppfd: PIXELFORMATDESCRIPTOR Cref;} Int32 {} "SetPixelFormat" importFunction
+{deviceContext: Natx;} Int32 {} "SwapBuffers" importFunction
+{
+  lpMsg: MSG Ref;
+  hWnd: Natx;
+  wMsgFilterMin: Nat32;
+  wMsgFilterMax: Nat32;
+  wRemoveMsg: Nat32;
+} Int32 {} "PeekMessageW" importFunction
+{message: MSG Ref;} Natx {} "DispatchMessageW" importFunction
+{hwnd: Natx; point: POINT Ref;} Int32 {} "ClientToScreen" importFunction
+{x: Int32; y: Int32;} Int32 {} "SetCursorPos" importFunction
+{hwnd: Natx;} Natx {} "SetCapture" importFunction
+{} Int32 {} "ReleaseCapture" importFunction
+{reserved: Natx;} Int32 {} "CoInitialize" importFunction
+{} () {} "CoUninitialize" importFunction

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <PropertyPageSchema Include="$(MSBuildThisFileDirectory)$(MSBuildThisFileName).xml"/>
+  </ItemGroup>
+  <PropertyGroup>
+    <CleanDependsOn>
+      $(CleanDependsOn);
+      FastClean
+    </CleanDependsOn>
+  </PropertyGroup>
+  <Target Name="FastAll"
+          Condition="'@(Fast)'!=''"
+          AfterTargets="CustomBuild"
+          Inputs="@(Fast)"
+          Outputs="%(Fast.CompilerOutput);%(Fast.ClangOutput)">
+    <Message Importance="high"
+             Text="Compiling Fast MPL, %(Fast.CompilerOutput)..."/>
+    <Exec Command="%(Fast.CompilerPath) -o %(Fast.CompilerOutput) %(Fast.CompilerOptions) @(Fast, ' ')"/>
+    <Message Importance="high"
+             Text="Assembling object, %(Fast.ClangOutput)..."/>
+    <Exec Command="%(Fast.ClangPath) -o %(Fast.ClangOutput) %(Fast.ClangOptions) %(Fast.CompilerOutput)"/>
+    <ItemGroup>
+      <Link Include="%(Fast.ClangOutput)"/>
+    </ItemGroup>
+  </Target>
+  <Target Name="FastClean">
+    <Delete Files="%(Fast.CompilerOutput)"/>
+  </Target>
+</Project>

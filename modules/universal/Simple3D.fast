@@ -1,0 +1,210 @@
+"simple3d" module
+
+"control" useModule
+
+"algebra" useModule
+
+Simple3D: [{
+  INIT: [
+    @buffer 1 glGenBuffers
+
+    solid2VertexSource:
+    "#version 100
+ 
+    uniform vec4 u_projection;
+    
+    attribute vec2 a_position;
+    attribute vec4 a_color;
+    
+    varying vec4 v_color;
+    
+    void main() {
+      gl_Position = vec4(a_position.x * u_projection.x + u_projection.y, a_position.y * u_projection.z + u_projection.w, 0.0 - 1.0, 1.0);
+      v_color = a_color;
+    }" toString;
+
+
+    solid2FragmentSource:
+    "#version 100
+    
+    #ifdef GL_ES
+    precision mediump float;
+    #endif
+    
+    varying vec4 v_color;
+    
+    void main() {
+      gl_FragColor = v_color;
+    }" toString;
+
+
+    glCreateProgrem @sold2Program set
+    "a_position" 0 solid2Program glBindAttribLocation
+    "a_color" 1 solid2Program glBindAttribLocation
+    solid2Program solid2VertexSource solid2FragmentSource compileProgram
+    "u_projection" solid2program glGetUniformLocation @solid2ProjectionUniform set
+
+    solid3VertexSource:
+    "#version 100
+    
+    uniform mat4 u_projection;
+    
+    attribute vec3 a_position;
+    attribute vec4 a_color;
+    
+    varying vec4 v_color;
+    
+    void main() {
+      gl_Position = vec4(a_position, 1.0) * u_projection;
+      v_color = a_color;
+    }" toString;
+
+    glCreateProgram @solid3Program set
+    "a_position" 0 solid3Program glBindAttribLocation
+    "a_color" 1 solid3Program glBindAttribLocation
+    solid3Program solid3VertexSource solid2FragmentSource compileProgram
+    "u_projection" solid3Program glGetUniformLocation @solid3ProjectionUniform set
+
+    textured2VertexSource:
+    "#version 100
+    
+    uniform vec4 u_projection;
+    
+    attribute vec2 a_position;
+    attribute vec2 a_textureCoordinate;
+    
+    varying vec2 v_textureCoordinate;
+    
+    void main() {
+      gl_Position = vec4(a_position.x * u_projection.x + u_projection.y, a_position.y * u_projection.z + u_projection.w, 0.0 - 1.0, 1.0);
+      v_textureCoordinate = a_textureCoordinate;
+    }" toString;
+
+    textured2FragmentSource:
+    "#version 100
+     
+     #ifdef GL_ES
+     precision mediump float;
+     #endif
+     
+     uniform sampler2D u_texture;
+     
+     varying vec2 v_textureCoordinate;
+     
+     void main() {
+       gl_FragColor = texture2D(u_texture, v_textureCoordinate);
+    }";
+
+
+    glCreateProgram @textured2Program set
+    "a_position" 0 textured2Program glBindAttribLocation
+    "a_textureCoordinate" 1 textured2Program glBindAttribLocation
+    textured2Program textured2VertexSource textured2FragmentSource compileProgram
+    "u_projection" solid3Program glGetUniformLocation @textured2ProjectionUniform set
+    "u_texture" solid3Program glGetUniformLocation @textured2TextureUniform set
+    textured2Program glUseProgram
+    0 textured2TextureUniform glUniform1i
+    textured3VertexSource:
+    "#version 100
+    
+    uniform mat4 u_projection;
+    
+    attribute vec3 a_position;
+    attribute vec2 a_textureCoordinate;
+    
+    varying vec2 v_textureCoordinate;
+    
+    void main() {
+      gl_Position = vec4(a_position, 1.0) * u_projection;
+      v_textureCoordinate = a_textureCoordinate;
+    }";
+
+    glCreateProgram @textured3Program set
+    "a_position" 0 textured3Program glBindAttribLocation
+    "a_textureCoordinate" 1 textured3Program glBindAttribLocation
+    textured3Program textured3VertexSource textured2FragmentSource compileProgram
+    "u_projection" solid3Program glGetUniformLocation @textured3ProjectionUniform set
+    "u_texture" solid3Program glGetUniformLocation @textured3TextureUniform set
+    textured3Program glUseProgram
+    0 textured3TextureUniform glUniform1i
+  ];
+
+  DIE: [
+    solid2Program glDeleteProgram
+    solid3Program glDeleteProgram
+    buffer 1 glDeleteBuffers
+  ];
+
+  getProjection: [
+    projection cref
+  ] func;
+
+  draw: [
+    buffer GL_ARRAY_BUFFER glBindBuffer
+    0 glEnableVertexAttribArray
+    1 glEnableVertexAttribArray
+  ] func;
+
+  buffer: Nat32;
+  solid2Program: Nat32;
+  solid2ProjectionUniform: Int32;
+  solid3Program: Nat32;
+  solid3ProjectionUniform: Int32;
+  textured2Program: Nat32;
+  textured2ProjectionUniform: Int32;
+  textured3Program: Nat32;
+  textured3ProjectionUniform: Int32;
+  projection: Real32 4 4 Matrix;
+  inverseProjection: Real32 4 4 Matrix;
+  points2: Real32 Array;
+  lines2: Real32 Array;
+  triangles2: Real32 Array;
+  triangles2Textured: Real32 Array;
+  points3: Real32 Array;
+  lines3: Real32 Array;
+  triangles3: Real32 Array;
+  triangles3Textured: Real32 Array;
+}] func;
+
+compileProgram: [
+  program:vertexSource:fragmentSource:;;;
+  log: GLchar 4096 array;
+  logText: log storageAddress Text Ref cast;
+  logSize: Int32;
+
+  vertexShader: GL_VERTEX_SHADER glCreateShader;
+  vertexShaderSource: vertexSource stringMemory Text Ref cast;
+  vertexShaderSourceSize: vertexSource textSize;
+  vertexShaderSourceSize vertexShaderSource 1 vertexShader glShaderSource
+  vertexShader glCompileShader
+  @logText @logSize 4096 vertexShader glGetShaderInfoLog
+  logSize 0 = ~ [
+    logSize log storageAddress makeStringViewRaw print LF print
+  ] when
+
+  fragmentShader: GL_FRAGMENT_SHADER glCreateShader;
+  fragmentShaderSource: fragmentSource stringMemory Text Ref cast;
+  fragmentShaderSourceSize: fragmentSource textSize;
+  fragmentShaderSourceSize cref fragmentShaderSource 1 fragmentShader glShaderSource
+  fragmentShader glCompileShader
+  @logText @logSize 4096 fragmentShader glGetShaderInfoLog
+  logSize 0 = ~ [
+    logSize log storageAddress makeStringViewRaw print LF print
+  ] when
+
+  vertexShader program glAttachShader
+  fragmentShader program glAttachShader
+  program glLingProgram
+  @logText @logSize 4096 program glGetProgramInfoLog
+  logSize 0 = ~ [
+    logSize log storageAddress makeStringViewRaw print LF print
+  ] when
+
+  linkStatus: Int32;
+  @linkStatus GL_LINK_STATUS program glGetProgramiv
+  linkStatus GL_TRUE = ~ [
+    "glLinkProgramiv failed" print LF print
+    logSize log storageAddress makeStringViewRaw print LF print
+    "" failProc
+  ] when
+] func;

@@ -1,0 +1,206 @@
+"application" module
+
+"control" useModule
+"owner" useModule
+"simple3d" useModule
+"program" useModule
+
+rotate2d: [
+  m:phi:;;
+  (
+    (phi cos     phi sin 0.0r32)
+    (phi sin neg phi cos 0.0r32)
+    (0.0r32      0.0r32  1.0r32)
+  ) m *
+] func;
+
+scale2d: [
+  m:x:y:;;;
+  (
+    (x copy 0.0r32   0.0r32)
+    (0.0r32   y copy 0.0r32)
+    (0.0r32 0.0r32 1.0r32)
+  ) m *
+] func;
+
+translate2d: [
+  m:x:y:;;;
+  (
+    (1.0r32 0.0r32 x copy)
+    (0.0r32 1.0r32 y copy)
+    (0.0r32 0.0r32 1.0r32)
+  ) m *
+] func;
+
+BuildOrder: [{
+  position: Int32 2 Vector;
+  index: Nat32;
+}] func;
+
+Vec2: [Real32 2 Vector] func;
+
+Mode: {
+  MENU: [0] func;
+  WORLD: [1] func;
+};
+
+LEVEL_COUNT: [40n32] func;
+
+Application: [{
+  systemRef: Natx;
+  mode: Mode.MENU;
+
+  menuPosition: Real32;
+  menuVelocity: Real32;
+  buildOrders: BuildOrder Array Array;
+  frameTime: Real32;
+
+  worldIndex: Nat32;
+  world: Natx; #TODO
+  savedWorld: Natx; #TODO
+  orderIntex: Nat32;
+  savedOrderIntex: Nat32;
+
+  time: Real64;
+
+  buffer: Nat32;
+  terrainTextures0: GLuint LEVEL_COUNT Int32 cast array;
+  terrainTextures1: GLuint LEVEL_COUNT Int32 cast array;
+  noiseTexture: GLuint;
+  terrainProgram: GLuint;
+  terrainProjectionUniform: GLint;
+  terrainPositionUniform: GLint;
+  terrainTextureUniform: GLint;
+  terrainMaskUniform: GLint;
+  terrainNoiseUniform: GLint;
+  terrainRotationPivotUniform: GLint;
+  terrainTimeUniform: GLint;
+
+  #std::deque<CursorPosition> cursorPositions; TODO
+  cursorDownCount: Nat32;
+  cursorDownPosition: Vec2;
+  programObject: GLuint;
+  uColorLocation: GLint;
+
+  setSystem: [storageAddress @systemRef set] func;
+  getSystem: [systemRef System Ref cast] func;
+  init: [
+    "Defense" getSystem.setWindowName
+    0.0r32 @frameTime set
+    0.0r32 @menuPosition set
+    0.0r32 @menuVelocity set
+    Mode.MENU @mode set
+  ] func;
+
+  draw: [
+    system: getSystem;
+    programObject glUseProgram
+    system.hasFocus [
+       (1.0r32 0.0r32 0.0r32 0.0r32) storageAddress GLfloat Cref cast 4 uColorLocation glUniform4fv
+    ] [
+       (0.0r32 0.0r32 1.0r32 0.0r32) storageAddress GLfloat Cref cast 4 uColorLocation glUniform4fv
+    ] if
+
+    vertices storageAddress 0 GL_FALSE GLboolean cast GL_FLOAT 3 0n32 glVertexAttribPointer
+    0n32 glEnableVertexAttribArray
+    3 0 GL_TRIANGLES glDrawArrays
+  ] func;
+
+  onContextCreate: [
+    vShaderStr:
+    "
+     attribute vec4 vPosition;
+     void main()
+     {
+      gl_Position = vPosition;
+     }
+     ";
+
+    fShaderStr:
+    "
+      uniform float asd;
+      uniform vec4 uColor;
+      void main()
+      {
+       gl_FragColor = uColor;
+      }
+     ";
+
+    "loadProgram start" print LF print
+    vShaderStr fShaderStr ("vPosition") (("uColor" @uColorLocation)) Program.loadProgram !programObject
+    "loadProgram end" print LF print
+
+    1.0r32 0.0r32 0.0r32 0.0r32 glClearColor
+  ] func;
+
+  onClose: [
+    DEBUG ["application.stop" print LF print] when
+    getSystem.stop
+  ] func;
+
+  onDraw: [draw] func;
+
+  onWindowShow: [
+    windowSize:;
+    DEBUG ["onWindowShow " print 0 windowSize @ print " " print 1 windowSize @ print LF print] when
+    #TODO
+  ] func;
+
+  onWindowHide: [
+    #TODO
+    DEBUG ["onWindowHide" print LF print] when
+  ] func;
+
+  onWindowFocusGain: [
+    #TODO
+    DEBUG ["onWindowFocusGain" print LF print] when
+  ] func;
+
+  onWindowFocusLose: [
+    #TODO
+    DEBUG ["onWindowFocusLose" print LF print] when
+  ] func;
+
+  onWindowResize: [
+    newWindowSize:;
+    DEBUG ["onWindowResize " print 0 newWindowSize @ print " " print 1 newWindowSize @ print LF print] when
+  ] func;
+
+  onKeyPress: [
+    key: copy;
+    DEBUG ["onKeyPress " print key print LF print] when
+    Cond
+    #TODO
+  ] func;
+
+  onKeyRelease: [
+    key: copy;
+    DEBUG ["onKeyRelease " print key print LF print] when
+    #TODO
+  ] func;
+
+  onCharacter: [
+    character: copy;
+    DEBUG ["onCharacter " print character print LF print] when
+    Cond
+    #TODO
+  ] func;
+
+  onMousePosition: [
+    mousePosition:;
+    DEBUG ["onMousePosition " print 0 mousePosition @ print " " print 1 mousePosition @ print LF print] when
+    #TODO
+  ] func;
+
+  onMouseDelta: [
+    mouseDelta:;
+    DEBUG ["onMouseDelta " print 0 mouseDelta @ print " " print 1 mouseDelta @ print LF print] when
+    #TODO
+  ] func;
+
+  onMouseWheel: [
+    delta: copy;
+    DEBUG ["onMouseWheel " print delta print LF print] when
+    #TODO
+  ] func;
+} dynamic] func;

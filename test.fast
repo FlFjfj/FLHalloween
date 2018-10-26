@@ -1,0 +1,19 @@
+"string" useModule
+
+"system" useModule
+"algebra" useModule
+"array" useModule
+"arrayInputStream" useModule
+
+#"opengl" useModule
+vertices: (
+  0.0r32  0.5r32 0.0r32
+  0.5r32 -0.5r32 0.0r32
+  -0.5r32 -0.5r32 0.0r32
+);
+
+{} () {} [
+  system: System;
+  @system.run
+] "main" exportFunction
+

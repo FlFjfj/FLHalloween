@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Fast Include="test.fast" />
+    <Fast Include="sl\array.fast">
+      <Filter>sl</Filter>
+    </Fast>
+    <Fast Include="sl\ascii.fast">
+      <Filter>sl</Filter>
+    </Fast>
+    <Fast Include="sl\avlMap.fast">
+      <Filter>sl</Filter>
+    </Fast>
+    <Fast Include="sl\control.fast">
+      <Filter>sl</Filter>
+    </Fast>
+    <Fast Include="sl\file.fast">
+      <Filter>sl</Filter>
+    </Fast>
+    <Fast Include="sl\hashTable.fast">
+      <Filter>sl</Filter>
+    </Fast>
+    <Fast Include="sl\json.fast">
+      <Filter>sl</Filter>
+    </Fast>
+    <Fast Include="sl\memory.fast">
+      <Filter>sl</Filter>
+    </Fast>
+    <Fast Include="sl\owner.fast">
+      <Filter>sl</Filter>
+    </Fast>
+    <Fast Include="sl\randomLCG.fast">
+      <Filter>sl</Filter>
+    </Fast>
+    <Fast Include="sl\string.fast">
+      <Filter>sl</Filter>
+    </Fast>
+    <Fast Include="sl\union.fast">
+      <Filter>sl</Filter>
+    </Fast>
+    <Fast Include="sl\variant.fast">
+      <Filter>sl</Filter>
+    </Fast>
+    <Fast Include="modules\universal\Model.fast">
+      <Filter>universal</Filter>
+    </Fast>
+    <Fast Include="modules\universal\BoxSpartialIndex2.fast">
+      <Filter>universal</Filter>
+    </Fast>
+    <Fast Include="modules\windows\System.fast">
+      <Filter>windows</Filter>
+    </Fast>
+    <Fast Include="modules\windows\WinAPI.fast">
+      <Filter>windows</Filter>
+    </Fast>
+    <Fast Include="modules\windows\OpenGL.fast">
+      <Filter>windows</Filter>
+    </Fast>
+    <Fast Include="modules\universal\Application.fast">
+      <Filter>universal</Filter>
+    </Fast>
+    <Fast Include="modules\windows\GLWrapper.fast">
+      <Filter>windows</Filter>
+    </Fast>
+    <Fast Include="modules\universal\Simple3D.fast">
+      <Filter>universal</Filter>
+    </Fast>
+    <Fast Include="modules\universal\Program.fast">
+      <Filter>universal</Filter>
+    </Fast>
+    <Fast Include="modules\universal\base\Algebra.fast">
+      <Filter>universal\base</Filter>
+    </Fast>
+    <Fast Include="modules\universal\base\ArrayInputStream.fast">
+      <Filter>universal\base</Filter>
+    </Fast>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="sl">
+      <UniqueIdentifier>{65c45e7c-4417-4fc9-a7e3-d17b4c6dbe68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="windows">
+      <UniqueIdentifier>{4c376408-42e1-4dfe-8047-64257c1d4790}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="universal">
+      <UniqueIdentifier>{d6bb045b-543f-4c25-9d0d-b0d89e295850}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="universal\base">
+      <UniqueIdentifier>{7a56952c-e137-422e-857a-c3359a2345f3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".editorconfig" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,49 @@
+"glwrapper" module
+
+"control" useModule
+
+{target: Nat32; texture: Nat32;} () {} "glBindTexture" importFunction
+{sfactor: Nat32; dfactor: Nat32;} () {} "glBlendFunc" importFunction
+{mask: Nat32;} () {} "glClear" importFunction
+{red: Real32; green: Real32; blue: Real32; alpha: Real32;} () {} "glClearColor" importFunction
+{s: Int32;} () {} "glClearStencil" importFunction
+{red: Nat8; green: Nat8; blue: Nat8; alpha: Nat8;} () {} "glColorMask" importFunction
+{target: Nat32; level: Int32; internalformat: Nat32; x: Int32; y: Int32; width: Int32; height: Int32; border: Int32;} () {} "glCopyTexImage2D" importFunction
+{target: Nat32; level: Int32; xoffset: Int32; yoffset: Int32; x: Int32; y: Int32; width: Int32; height: Int32;} () {} "glCopyTexSubImage2D" importFunction
+{mode: Nat32;} () {} "glCullFace" importFunction
+{n: Int32; textures: Nat32 Ref;} () {} "glDeleteTextures" importFunction
+{func: Nat32;} () {} "glDepthFunc" importFunction
+{flag: Nat8;} () {} "glDepthMask" importFunction
+{cap: Nat32;} () {} "glDisable" importFunction
+{mode: Nat32; first: Int32; count: Int32;} () {} "glDrawArrays" importFunction
+{mode: Nat32; count: Int32; type: Nat32; indices: Natx;} () {} "glDrawElements" importFunction
+{cap: Nat32;} () {} "glEnable" importFunction
+{} () {} "glFinish" importFunction
+{} () {} "glFlush" importFunction
+{mode: Nat32;} () {} "glFrontFace" importFunction
+{n: Int32; textures: Nat32 Ref;} () {} "glGenTextures" importFunction
+{pname: Nat32; data: Nat8 Ref;} () {} "glGetBooleanv" importFunction
+{} Nat32 {} "glGetError" importFunction
+{pname: Nat32; data: Real32 Ref;} () {} "glGetFloatv" importFunction
+{pname: Nat32; data: Int32 Ref;} () {} "glGetIntegerv" importFunction
+{name: Nat32;} Text {} "glGetString" importFunction
+{target: Nat32; pname: Nat32; params: Real32 Ref;} () {} "glGetTexParameterfv" importFunction
+{target: Nat32; pname: Nat32; params: Int32 Ref;} () {} "glGetTexParameteriv" importFunction
+{target: Nat32; mode: Nat32;} () {} "glHint" importFunction
+{cap: Nat32;} Nat8 {} "glIsEnabled" importFunction
+{texture: Nat32;} Nat8 {} "glIsTexture" importFunction
+{width: Real32;} () {} "glLineWidth" importFunction
+{pname: Nat32; param: Int32;} () {} "glPixelStorei" importFunction
+{factor: Real32; units: Real32;} () {} "glPolygonOffset" importFunction
+{x: Int32; y: Int32; width: Int32; height: Int32; format: Nat32; type: Nat32; pixels: Natx;} () {} "glReadPixels" importFunction
+{x: Int32; y: Int32; width: Int32; height: Int32;} () {} "glScissor" importFunction
+{func: Nat32; ref: Int32; mask: Nat32;} () {} "glStencilFunc" importFunction
+{mask: Nat32;} () {} "glStencilMask" importFunction
+{fail: Nat32; zfail: Nat32; zpass: Nat32;} () {} "glStencilOp" importFunction
+{target: Nat32; level: Int32; internalformat: Int32; width: Int32; height: Int32; border: Int32; format: Nat32; type: Nat32; pixels: Natx;} () {} "glTexImage2D" importFunction
+{target: Nat32; pname: Nat32; param: Real32;} () {} "glTexParameterf" importFunction
+{target: Nat32; pname: Nat32; params: Real32 Ref;} () {} "glTexParameterfv" importFunction
+{target: Nat32; pname: Nat32; param: Int32;} () {} "glTexParameteri" importFunction
+{target: Nat32; pname: Nat32; params: Int32 Ref;} () {} "glTexParameteriv" importFunction
+{target: Nat32; level: Int32; xoffset: Int32; yoffset: Int32; width: Int32; height: Int32; format: Nat32; type: Nat32; pixels: Natx;} () {} "glTexSubImage2D" importFunction
+{x: Int32; y: Int32; width: Int32; height: Int32;} () {} "glViewport" importFunction

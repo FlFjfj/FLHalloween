@@ -1,0 +1,42 @@
+"arrayInputStream" module
+
+"array" useModule
+"control" useModule
+"memory" useModule
+
+ArrayInputStream: [{
+  range: makeArrayRange;
+  
+  readTo: [
+    var:;
+    var storageAddress var storageSize Nat32 cast Int32 cast readSome
+  ] func;
+
+  read8: ["STRING" has] [
+    string:;
+    size: Nat8 read;
+    size @string.@chars.resize
+    @string stringMemory size readSome
+  ] pfunc;
+  
+  read: [
+    var:;
+    @var readTo
+    var copy
+  ] func;
+    
+  readSome: [
+    address:size:;;
+    range.getBufferBegin address size copyMemory
+    size range.getSize range makeSubRange !range
+  ] func;
+}] func;
+
+copyMemory: [
+  src:dst:count:;;;
+  count [
+    srcByte: src i Intx cast Natx cast + Nat8 Cref cast;
+    dstByte: dst i Intx cast Natx cast + Nat8 Ref cast;
+    srcByte @dstByte set
+  ] times
+] func;

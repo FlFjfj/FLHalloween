@@ -1,0 +1,85 @@
+"BoxSpartialIndex2" module
+
+"control" useModule
+
+BoxSpatialIndex2: [{
+  Box: [{
+    parent: Nat32;
+    children: Nat32 4 array;
+    dist: Real32;
+    size: Real32;
+    leftBottom: 2 Real32 Vector;
+  }] func;
+
+  Point: [{
+    position: 2 Real32 Vector;
+    userIndex: Natx;
+    next: Nat32;
+    dist: Real32;
+  }] func;
+
+  rootIndex: Nat32;
+  boxes: Box Pool;
+  points: Point Pool;
+
+  addPoint: [
+  ] func;
+
+  addPoint: [
+    userIndex:position:;;
+    0 position @ abs 1 position @ abs > [
+      down: 1 position @ 1 rootIndex boxes @ .leftBottom @ <;
+    ] [
+    ] if
+  ] func;
+
+  deletePoint: [
+    index:;
+  ] func;
+
+  movePoint: [
+    index:position:;;
+    Nat32
+  ] func;
+
+  getUserIndex: [
+    index:;
+    Natx
+  ] func;
+
+  find: [
+    center:radius:indexes:;;;
+    Nat32
+  ] func;
+
+  getNodeCount: [
+    Nat32
+  ] func;
+
+  enlarge: [
+    left:down:;;
+  ] func;
+
+  getNorthNeighbour: [
+    boxIndex:;
+  ] func;
+
+  getEastNeighbour: [
+    boxIndex:;
+  ] func;
+}] func;
+
+makeBoxSpatialIndex2: [
+  boxSpatialIndex2: BoxSpatialIndex2;
+  @boxSpatialIndex2.@boxes.allocate Nat32 cast @boxSpatialIndex2.@rootIndex set
+  rootBox: rootIndex @boxSpatialIndex2.@boxes @;
+  0xFFFFFFFFn32
+  @rootBox.@parent set
+  (0xFFFFFFFEn32 0x0n32 rootIndex 0x80000000n32 or 0xFFFFFFFF)
+  @rootBox.@parent set
+  1.0r32
+  @rootBox.@size set
+  (0.0r32 0.0r32) makeVector
+  @rootBox.@leftBottom set
+  @boxSpatialIndex2 move copy
+] func;
