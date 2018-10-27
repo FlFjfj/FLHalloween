@@ -12,6 +12,8 @@ Player: [
     projLoc: GLint;
     modelLoc: GLint;
 
+    size: 150.0r32;
+    
     init: [
       assets.playerBack copy !texture
       PlayerStaticShader.shaderVert PlayerStaticShader.shaderFrag ( ("u_modelTrans" @modelLoc) ("u_projTrans" @projLoc) ) loadShader !shader
@@ -23,12 +25,16 @@ Player: [
     draw: [
       shader glUseProgram
       camera.getCombined GL_FALSE Nat8 cast 1i32 projLoc glUniformMatrix4fv
-      texture x y 150.0r32 150.0r32 0.0r32 modelLoc batch.draw
+      texture x y size size 0.0r32 modelLoc batch.draw
       0n32 glUseProgram
     ] func;
 
     update: [
-
+      RIGHT system.isKeyDown [ x 1000.0r32 FRAME_DURATION * + !x ] when
+      LEFT system.isKeyDown  [ x 1000.0r32 FRAME_DURATION * - !x ] when
+      
+      UP system.isKeyDown [ size 100.0r32 FRAME_DURATION * + !size ] when
+      DOWN system.isKeyDown  [ size 100.0r32 FRAME_DURATION * - !size ] when
     ] func;
   }
 ] func;

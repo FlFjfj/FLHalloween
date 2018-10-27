@@ -118,7 +118,7 @@ System: [{
   keys: Cond 256 array dynamic;
   positionChanging: Cond dynamic;
   application: Application dynamic;
-  FRAME_DURATION: [0.0625r32] func;
+  FRAME_DURATION: 0.0400r32;
   time: Nat32;
   frameTime: Real32;
   physicsSpeed: Real32;
@@ -380,15 +380,15 @@ System: [{
           previousTime: time copy;
           getTime @time set
           frameDuration: time previousTime - Real32 cast 0.001r32 *;
+          frameDuration copy !FRAME_DURATION
           additionalFrameTime: frameDuration FRAME_DURATION / physicsSpeed *;
-          frameTime additionalFrameTime + @frameTime set
-          [frameTime 1.0r32 < ~] [
+          #frameTime additionalFrameTime + @frameTime set
+          #[frameTime 1.0r32 < ~] [
             @application.update
-            frameTime 1.0r32 - @frameTime set
+           # frameTime 1.0r32 - @frameTime set
+          #] while
 
-          ] while
-
-          @application.onDraw
+           @application.onDraw
           stopped not [
             window GetDC SwapBuffers 1 = not [
               [FALSE] "ERRROR" assert
