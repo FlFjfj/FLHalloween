@@ -3,52 +3,83 @@
 "control" useModule
 "algebra" useModule
 
+PlayerConst: {
+  WIDTH: 100.0r32;
+  HEIGHT: 150.0r32;
+
+  DIR_NONE:  0;
+  DIR_UP:    1;
+  DIR_DOWN:  2;
+  DIR_LEFT:  3;
+  DIR_RIGHT: 4;
+};
+
 Player: [{
-  speed: 400.0r32;
-  texture: GLuint;
+  texture: (5 [GLuint] times);
   shader: GLuint;
+  state0: (Real32 Real32);
+  state1: (Real32 Real32);
+
+  moveDir: PlayerConst.DIR_NONE copy;
+
+  timeLoc: GLint;
   projLoc: GLint;
   modelLoc: GLint;
-  state0: (-200.0r32 -200.0r32);
-  state1: (-200.0r32 -200.0r32);
-  size: 150.0r32;
+
+  speed: 400.0r32;
+
 
   init: [
-    assets.playerBack copy !texture
-    PlayerStaticShader.shaderVert PlayerStaticShader.shaderFrag ( ("u_modelTrans" @modelLoc) ("u_projTrans" @projLoc) ) loadShader !shader
+    (
+      assets.playerStand copy
+      assets.playerBack copy
+      assets.playerFront copy
+      assets.playerSideLeft copy
+      assets.playerSideRight copy
+    ) !texture
+    PlayerAnimatedShader.shaderVert PlayerAnimatedShader.shaderFrag
+    (
+      ("u_modelTrans" @modelLoc)
+      ("u_projTrans" @projLoc)
+      ("u_Time" @timeLoc)
+    ) loadShader !shader
 
-    "Player model " print modelLoc print LF print
-    "Player proj " print projLoc print LF print
   ] func;
 
   draw: [
     shader glUseProgram
-    camera.getCombined GL_FALSE Nat8 cast 1i32 projLoc glUniformMatrix4fv
     coords: state0 state1 state0 - frameTime * +;
-    texture coords unwind size size 0.0r32 modelLoc batch.draw
+    getTime timeLoc glUniform1f
+    camera.getCombined GL_FALSE Nat8 cast 1i32 projLoc glUniformMatrix4fv
+    moveDir texture @ coords unwind PlayerConst.WIDTH PlayerConst.HEIGHT 0.0r32 modelLoc batch.draw
     0n32 glUseProgram
   ] func;
 
   update: [
+    PlayerConst.DIR_NONE copy !moveDir
     state1 @state0 set
     direction: (0.0r32 0.0r32) dynamic;
     RIGHT system.isKeyDown [
       1.0r32 0 @direction @ set
+      PlayerConst.DIR_RIGHT copy !moveDir
     ] when
 
     LEFT system.isKeyDown [
       -1.0r32 0 @direction @ set
+      PlayerConst.DIR_LEFT copy !moveDir
     ] when
 
     UP system.isKeyDown [
       1.0r32 1 @direction @ set
+      PlayerConst.DIR_UP copy !moveDir
     ] when
 
     DOWN system.isKeyDown [
       -1.0r32 1 @direction @ set
+      PlayerConst.DIR_DOWN copy !moveDir
     ] when
 
-    (0.0r32 0.0r32) direction = ~ [
+    (0.0r32 0.0r32) direction = ~ [ 
       newState1: direction normalize speed * FRAME_DURATION * state0 +;
       newState1 toLegs isOnWall? ~ [
         newState1 @state1 set
@@ -57,7 +88,7 @@ Player: [{
   ] func;
 
   toLegs: [
-    (0.0r32 size 2.0r32 /) -
+    (0.0r32 PlayerConst.HEIGHT 2.0r32 /) -
   ] func;
   
   isOnWall?: [
@@ -81,20 +112,26 @@ Player: [{
   ] func;
 }] func;
 
-PlayerStaticShader: {
+PlayerAnimatedShader: {
   shaderVert:
   "
-#version 330 core
-
+  #version 330 core
+  
+  #define FRAME_COUNT 4.0
+  #define FRAME_TIME 0.15
+  
   layout (location = 0) in vec3 aPosition;
   layout (location = 1) in vec2 aCoord;
 
   uniform mat4 u_projTrans;
   uniform mat4 u_modelTrans;
-
+  uniform float u_Time;
+  
   out vec2 vCoord;
+  flat out float vFrame;
   
   void main() {
+    vFrame = int((u_Time - int(u_Time)) * FRAME_COUNT);
     vCoord = aCoord;
     gl_Position = u_projTrans * u_modelTrans * vec4(aPosition, 1.0);
   }
@@ -102,17 +139,21 @@ PlayerStaticShader: {
 
   shaderFrag:
   "
-#version 330 core
+  #version 330 core
 
+  #define FRAME_COUNT 4.0 
+  
   precision mediump float;
   
   in vec2 vCoord;
+  flat in float vFrame;
+  
   out vec4 color;
   
   uniform sampler2D u_Texture;
   
   void main() {
-    color = texture(u_Texture, vCoord);
+    color = texture(u_Texture, vec2(vCoord.x, (vCoord.y + vFrame) / FRAME_COUNT));
   }
   ";
 

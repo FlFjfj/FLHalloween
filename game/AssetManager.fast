@@ -14,7 +14,9 @@ initAssets: [
 
   "assets/playerBack.png" loadTexture @assets.!playerBack
   "assets/playerFront.png" loadTexture @assets.!playerFront
-  "assets/playerSide.png" loadTexture @assets.!playerSide
+  "assets/playerSideLeft.png" loadTexture @assets.!playerSideLeft
+  "assets/playerSideRight.png" loadTexture @assets.!playerSideRight
+  "assets/playerStand.png" loadTexture @assets.!playerStand
 ] func;
 
 assets: {
@@ -22,9 +24,11 @@ assets: {
   woodWallTile: Nat32;
   woodWallObj: Nat32;
 
+  playerStand: Nat32;
   playerBack: Nat32;
   playerFront: Nat32;
-  playerSide: Nat32;
+  playerSideLeft: Nat32;
+  playerSideRight: Nat32;
 
   menuImage: Nat32;
 };
