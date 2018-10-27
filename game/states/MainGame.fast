@@ -3,18 +3,26 @@
 "control" useModule
 "string" useModule
 "opengl" useModule
+
 "assets" useModule
+"worldmap" useModule
 
 MainGame: {
+  
+  map: WorldMap;
+  
   init: [
+    map.init
     "Game init" print LF print
   ] func;
 
   draw: [
+    map.draw
     "Game draw" print LF print
   ] func;
 
   update: [
+    map.update
     "Game update" print LF print
   ] func;
 };

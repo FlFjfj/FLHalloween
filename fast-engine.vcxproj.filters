@@ -83,6 +83,9 @@
     <Fast Include="game\states\MainGame.fast">
       <Filter>game\states</Filter>
     </Fast>
+    <Fast Include="game\terrain\WorldMap.fast">
+      <Filter>game\terrain</Filter>
+    </Fast>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="sl">
@@ -102,6 +105,9 @@
     </Filter>
     <Filter Include="game\states">
       <UniqueIdentifier>{a5c1532f-609f-4301-bfdd-27662fd4658c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\terrain">
+      <UniqueIdentifier>{ddd99de1-e89e-4004-b2b6-a9768e6623e2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

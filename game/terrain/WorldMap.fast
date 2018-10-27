@@ -1,0 +1,40 @@
+"worldmap" module
+
+"control" useModule
+"assets" useModule
+
+(
+  (1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 ) 
+  (1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 )
+)
+
+WorldMap: [
+  {
+    
+        
+    
+    init: [
+
+    ] func;
+
+    draw: [
+
+    ] func;
+
+    update: [
+
+    ] func;
+  }
+] func;
+
+WorldTiles: {
+  woodTrack: [{
+    texture:;
+
+    draw: [] func;
+  }] func;
+
+  woodWall: [{
+
+  }] func;
+};

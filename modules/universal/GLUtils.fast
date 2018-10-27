@@ -3,6 +3,7 @@
 "control" useModule
 "string" useModule
 "opengl" useModule
+"algebra" useModule
 
 {
   filename: Text;
@@ -36,4 +37,49 @@ generateFramebuffer: [
   0n32 GL_FRAMEBUFFER glBindFramebuffer
   fbo
   texture
+] func;
+
+orthographicCamera: [
+  w:h:;;
+
+  {
+    width: w; negWidth: 1.0r32 width /;
+    height: h; negHeight: 1.0r32 height /;
+    x:y: 0.0r32 0.0r32;;
+    zoom_val: 1.0r32;
+    angle: 0.0r32;
+
+    combined: 4 4 Matrix;
+
+    translate: [
+      y! x!
+    ] func;
+
+    rotate: [
+      !angle
+    ] func;
+
+    zoom: [
+      zoom_val * !zoom_val
+    ] func;
+
+    update: [
+      ident
+      negWeight zoom_val * negHeight zoom_val * scale2d
+      angle rotate2d
+      x y translate2d !combined
+    ] func;
+
+    getCombinedPtr: [
+      combined storageAddress combined storageSize
+    ] func;
+  } dynamic
+] func;
+
+spriteBatch: [
+  {
+    draw: [
+      texture:; x:; y:; angle:; modelLoc:;
+    ] func;
+  }
 ] func;

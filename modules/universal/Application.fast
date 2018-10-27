@@ -22,18 +22,19 @@ Application: [{
 
   init: [
     "Halloween" getSystem.setWindowName
+    GameState.MainGame copy !currentState
   ] func;
 
   draw: [
     system: getSystem;
 
-    #GameState.MainGame currentState =
-    #[ MainGame.draw ] when
+    GameState.MainGame currentState =
+    [ MainGame.draw ] when
   ] func;
 
   onContextCreate: [
     initAssets
-    #MainGame.init
+    MainGame.init
   ] func;
 
   onClose: [
