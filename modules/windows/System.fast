@@ -351,8 +351,8 @@ System: [{
     @application.init
     FALSE dynamic @stopped set
     createWindow
-    @application.onContextCreate
     result0: SW_SHOWDEFAULT window ShowWindow;
+    @application.onContextCreate
     stopped not [
       [
         message: MSG;
