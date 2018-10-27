@@ -9,8 +9,8 @@ Player: [{
   shader: GLuint;
   projLoc: GLint;
   modelLoc: GLint;
-  state0: (Real32 Real32);
-  state1: (Real32 Real32);
+  state0: (-200.0r32 -200.0r32);
+  state1: (-200.0r32 -200.0r32);
   size: 150.0r32;
 
   init: [
@@ -49,11 +49,35 @@ Player: [{
     ] when
 
     (0.0r32 0.0r32) direction = ~ [
-      dir: direction normalize;
-      change1: dir speed *;
-      change: change1 FRAME_DURATION *;
-      change state0 + @state1 set
+      newState1: direction normalize speed * FRAME_DURATION * state0 +;
+      newState1 toLegs isOnWall? ~ [
+        newState1 @state1 set
+      ] when
     ] when
+  ] func;
+
+  toLegs: [
+    (0.0r32 size 2.0r32 /) -
+  ] func;
+  
+  isOnWall?: [
+    coords:;
+    map: MainGame.map;
+    result: FALSE;
+    map.mapWidth [col: i;
+      map.mapHeight [row: i;
+        col row isWallTile? [
+          tileCoords: col row map.staticMapCoordinates @ @;
+          coords tileCoords - len map.R Real32 cast < result or !result
+        ] when
+      ] times
+    ] times
+    
+    result
+  ] func;
+
+  isWallTile?: [
+    MainGame.map.staticMap @ @ 2 = 
   ] func;
 }] func;
 
