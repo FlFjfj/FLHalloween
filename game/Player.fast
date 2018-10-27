@@ -53,20 +53,6 @@ Player: [{
       change1: dir speed *;
       change: change1 FRAME_DURATION *;
       change state0 + @state1 set
-
-
-      print: [isVector?] [
-        v:; v fieldCount [
-          i v @ print " " print
-        ] times
-        LF print
-      ] pfunc;
-
-      "dir     " print dir print
-      "change1 " print change1 print
-      "change  " print change print
-      "state0  " print state0 print
-      "state1  " print state1 print
     ] when
   ] func;
 }] func;

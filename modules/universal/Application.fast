@@ -95,12 +95,12 @@ Application: [{
 
   onWindowResize: [
     newWindowSize:;
-    DEBUG ["onWindowResize " print 0 newWindowSize @ print " " print 1 newWindowSize @ print LF print] when
+   # DEBUG ["onWindowResize " print 0 newWindowSize @ print " " print 1 newWindowSize @ print LF print] when
   ] func;
 
   onKeyPress: [
     key: copy;
-    DEBUG ["onKeyPress " print key print LF print] when
+    #DEBUG ["onKeyPress " print key print LF print] when
     key ESCAPE = [
       currentState
       (
@@ -114,32 +114,32 @@ Application: [{
 
   onKeyRelease: [
     key: copy;
-    DEBUG ["onKeyRelease " print key print LF print] when
+   # DEBUG ["onKeyRelease " print key print LF print] when
     #TODO
   ] func;
 
   onCharacter: [
     character: copy;
-    DEBUG ["onCharacter " print character print LF print] when
+  #  DEBUG ["onCharacter " print character print LF print] when
     Cond
     #TODO
   ] func;
 
   onMousePosition: [
     mousePosition:;
-    DEBUG ["onMousePosition " print 0 mousePosition @ print " " print 1 mousePosition @ print LF print] when
+  #  DEBUG ["onMousePosition " print 0 mousePosition @ print " " print 1 mousePosition @ print LF print] when
     #TODO
   ] func;
 
   onMouseDelta: [
     mouseDelta:;
-    DEBUG ["onMouseDelta " print 0 mouseDelta @ print " " print 1 mouseDelta @ print LF print] when
+  #  DEBUG ["onMouseDelta " print 0 mouseDelta @ print " " print 1 mouseDelta @ print LF print] when
     #TODO
   ] func;
 
   onMouseWheel: [
     delta: copy;
-    DEBUG ["onMouseWheel " print delta print LF print] when
+  #  DEBUG ["onMouseWheel " print delta print LF print] when
     #TODO
   ] func;
 } dynamic] func;
