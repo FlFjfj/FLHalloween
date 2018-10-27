@@ -30,8 +30,9 @@ MainGame: {
 
   draw: [
     GL_COLOR_BUFFER_BIT glClear
-    map.draw
+    map.drawFloor
     player.draw
+    map.drawObj
   ] func;
 
   update: [

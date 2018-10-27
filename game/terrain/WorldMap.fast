@@ -7,16 +7,23 @@ WorldMap: [
   {
 
     staticMap:(
-      (2 1 1 1 1 1)
-      (2 1 1 1 1 1)
-      (2 2 1 1 1 1)
-      (2 2 1 1 1 1)
-      (2 2 1 1 1 1)
+      (1 1 1 1 1 1 1)
+      (1 1 1 1 1 1 1)
+      (1 2 1 1 1 1 1)
+      (1 1 1 1 1 1 1)
+      (1 1 1 1 1 1 1)
+      (1 1 1 1 1 1 1)
+      (1 2 1 1 1 1 1)
+      (1 1 1 1 1 1 1)
+      (1 1 1 1 1 1 1)
     );
 
     mapWidth: 0 staticMap @ fieldCount;
 
     mapHeight: staticMap fieldCount;
+
+    mapCenterX: mapWidth 2 /;
+    mapCenterY: mapHeight 2 /;
 
     staticMapCoordinates: (Real32 Real32) mapWidth mapHeight Matrix;
 
@@ -35,64 +42,98 @@ WorldMap: [
 
           realR: R Real32 cast;
           x: 1.5r32 WorldTiles.width * col Real32 cast *
-          row Int32 cast 2 mod Real32 cast WorldTiles.sqrt32h * +;
-          y: row Real32 cast WorldTiles.height * 2.0r32 /;
+          row Int32 cast 2 mod Real32 cast WorldTiles.sqrt32h * + ;
+          y: row Real32 cast WorldTiles.height * 2.0r32 / ;
 
           (x copy y copy) @element set
 
         ] times
       ] times
+
+      centerCoords: mapCenterX mapCenterY @staticMapCoordinates @ @ copy;
+
+      mapHeight [row: i dynamic;
+        mapWidth [col: i dynamic;
+          element: col row @staticMapCoordinates @ @;
+          element centerCoords - @element set
+        ] times
+      ] times
+
+
+
     ] func;
 
-    draw: [
+    drawFloor: [
       shader glUseProgram
       camera.getCombined GL_FALSE Nat8 cast 1i32 projLoc glUniformMatrix4fv
       mapHeight [row: i dynamic;
         mapWidth [col: i dynamic;
           tileType: col row staticMap @ @;
-          tileType 1 = [ row col  WorldTiles.woodTrack.draw ]  [row col WorldTiles.woodWall.draw] if
+          tileType 1 = [ row col  WorldTiles.woodTrack.draw ]  [row col WorldTiles.woodWall.drawFloor] if
 
         ] times
       ] times
       0n32 glUseProgram
     ] func;
 
+
+    drawObj: [
+      shader glUseProgram
+      camera.getCombined GL_FALSE Nat8 cast 1i32 projLoc glUniformMatrix4fv
+      mapHeight [row: i dynamic;
+        mapWidth [col: i dynamic;
+          tileType: col row staticMap @ @;
+          tileType 2 = [ row col  WorldTiles.woodWall.drawObj]  [] if
+
+        ] times
+      ] times
+      0n32 glUseProgram
+    ] func;
+
+
     update: [
 
     ] func;
-  }
-] func;
-
-WorldTiles: {
-
-  width: 150.0r32;
-  height: 130.0r32;
-  sqrt32h: 3.0r32 sqrt height * 2.0r32 /;
-
-  init: [] func;
-
-  woodTrack: {
-    texture: assets.woodTrack;
-
-    draw: [row: col: Int32 cast; Int32 cast;
-      element: col row @staticMapCoordinates @ @;
-
-      assets.woodTrack 0 element @ 1 element @ WorldTiles.width WorldTiles.height 0.0r32 modelLoc batch.draw
+    }
     ] func;
-  };
 
-  woodWall: {
-    draw: [ row: col: Int32 cast; Int32 cast;
-      element: col row @staticMapCoordinates @ @;
+    WorldTiles: {
 
-      assets.woodWallTile 0 element @ 1 element @ WorldTiles.width WorldTiles.height 0.0r32 modelLoc batch.draw
-    ] func;
-  };
-};
+      width: 150.0r32;
+      height: 130.0r32;
+      sqrt32h: 3.0r32 sqrt height * 2.0r32 /;
 
-DefaultTileShader: {
-  shaderVert:
-  "
+      init: [] func;
+
+      woodTrack: {
+        texture: assets.woodTrack;
+
+        draw: [row: col: Int32 cast; Int32 cast;
+          element: col row @staticMapCoordinates @ @;
+
+          assets.woodTrack 0 element @ 1 element @ WorldTiles.width WorldTiles.height 0.0r32 modelLoc batch.draw
+        ] func;
+      };
+
+      woodWall: {
+        drawFloor: [ row: col: Int32 cast; Int32 cast;
+          element: col row @staticMapCoordinates @ @;
+
+          assets.woodWallTile 0 element @ 1 element @ WorldTiles.width WorldTiles.height 0.0r32 modelLoc batch.draw
+        ] func;
+
+        drawObj: [ row: col: Int32 cast; Int32 cast;
+          element: col row @staticMapCoordinates @ @;
+
+          assets.woodWallObj 0 element @ 1 element @ WorldTiles.height 2.0r32 / + WorldTiles.width WorldTiles.height 2.0r32 * 0.0r32 modelLoc batch.draw
+        ] func;
+
+      };
+    };
+
+    DefaultTileShader: {
+      shaderVert:
+      "
 #version 330 core
 
   layout (location = 0) in vec3 aPosition;
@@ -109,8 +150,8 @@ DefaultTileShader: {
   }
   ";
 
-  shaderFrag:
-  "
+      shaderFrag:
+      "
 #version 330 core
 
   precision mediump float;
@@ -124,4 +165,4 @@ DefaultTileShader: {
     color = texture(u_Texture, vCoord);
   }
   ";
-};
+    };
