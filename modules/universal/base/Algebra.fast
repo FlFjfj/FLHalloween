@@ -379,3 +379,33 @@ inv: [
 ] [
   m adj m det /
 ] pfunc;
+
+rotate2d: [
+  m:phi:;;
+  (
+    (phi cos     phi sin 0.0r32 0.0r32)
+    (phi sin neg phi cos 0.0r32 0.0r32)
+    (0.0r32      0.0r32  1.0r32 0.0r32)
+    (0.0r32      0.0r32  0.0r32 0.0r32)
+  ) m *
+] func;
+
+scale2d: [
+  m:x:y:;;;
+  (
+    (x copy 0.0r32 0.0r32 0.0r32)
+    (0.0r32 y copy 0.0r32 0.0r32)
+    (0.0r32 0.0r32 1.0r32 0.0r32)
+    (0.0r32 0.0r32 0.0r32 0.0r32)
+  ) m *
+] func;
+
+translate2d: [
+  m:x:y:;;;
+  (
+    (1.0r32 0.0r32 0.0r32 x copy)
+    (0.0r32 1.0r32 0.0r32 y copy)
+    (0.0r32 0.0r32 1.0r32 0.0r32)
+    (0.0r32 0.0r32 0.0r32 0.0r32)
+  ) m *
+] func;

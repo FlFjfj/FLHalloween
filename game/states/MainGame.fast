@@ -1,0 +1,20 @@
+"maingame" module
+
+"control" useModule
+"string" useModule
+"opengl" useModule
+"assets" useModule
+
+MainGame: {
+  init: [
+    "Game init" print LF print
+  ] func;
+
+  draw: [
+    "Game draw" print LF print
+  ] func;
+
+  update: [
+    "Game update" print LF print
+  ] func;
+};

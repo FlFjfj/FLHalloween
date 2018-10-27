@@ -77,6 +77,12 @@
     <Fast Include="modules\universal\GLUtils.fast">
       <Filter>universal</Filter>
     </Fast>
+    <Fast Include="game\AssetManager.fast">
+      <Filter>game</Filter>
+    </Fast>
+    <Fast Include="game\states\MainGame.fast">
+      <Filter>game\states</Filter>
+    </Fast>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="sl">
@@ -90,6 +96,12 @@
     </Filter>
     <Filter Include="universal\base">
       <UniqueIdentifier>{7a56952c-e137-422e-857a-c3359a2345f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game">
+      <UniqueIdentifier>{b7abd45f-cc48-453f-91f3-c5cf175ec99e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\states">
+      <UniqueIdentifier>{a5c1532f-609f-4301-bfdd-27662fd4658c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

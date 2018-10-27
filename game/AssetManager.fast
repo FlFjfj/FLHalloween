@@ -1,0 +1,16 @@
+"assets" module
+
+"string" useModule
+"control" useModule
+"opengl" useModule
+"glutils" useModule
+
+initAssets: [
+  "assets/woodTrack.png" loadTexture @assets.!woodTrack
+  "assets/woodWall.png" loadTexture @assets.!woodWall
+] func;
+
+assets: {
+  woodTrack: Nat32;
+  woodWall: Nat32;
+};
