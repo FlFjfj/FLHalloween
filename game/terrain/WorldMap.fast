@@ -5,17 +5,22 @@
 
 WorldMap: [
   {
-
+    
+    
     staticMap:(
-      (1 1 1 1 1 1 1)
-      (1 1 1 1 1 1 1)
-      (1 2 1 1 1 1 1)
-      (1 1 1 1 1 1 1)
-      (1 1 1 1 1 1 1)
-      (1 1 1 1 1 1 1)
-      (1 2 1 1 1 1 1)
-      (1 1 1 1 1 1 1)
-      (1 1 1 1 1 1 1)
+      (2 2 2 2 2 2 2 2 2)
+      (2 2 2 2 2 2 2 2 2)
+      (2 1 1 1 1 1 1 1 1)
+      (2 1 1 1 1 1 1 1 2)
+      (2 1 2 1 1 1 1 1 2)
+      (2 1 1 1 1 1 1 1 2)
+      (2 1 1 1 1 1 1 1 2)
+      (2 1 1 1 1 1 1 1 2)
+      (2 1 2 1 1 1 1 1 2)
+      (2 1 1 1 1 1 1 1 2)
+      (2 1 1 1 1 1 1 1 2)
+      (2 2 2 2 2 2 2 2 2)
+      (2 2 2 2 2 2 2 2 2)
     );
 
     mapWidth: 0 staticMap @ fieldCount;
@@ -44,6 +49,8 @@ WorldMap: [
           x: 1.5r32 WorldTiles.width * col Real32 cast *
           row Int32 cast 2 mod Real32 cast WorldTiles.sqrt32h * + ;
           y: row Real32 cast WorldTiles.height * 2.0r32 / ;
+          
+          
 
           (x copy y copy) @element set
 
@@ -145,6 +152,7 @@ DefaultTileShader: {
   out vec2 vCoord;
   
   void main() {
+
     vCoord = aCoord;
     gl_Position = u_projTrans * u_modelTrans * vec4(aPosition, 1.0);
   }
@@ -166,3 +174,6 @@ DefaultTileShader: {
   }
   ";
 };
+
+
+#{{ 2, 0, 0, 0}, {0, 1/2, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}} . {{cos(-pi/4), sin(-pi/4), 0 , 0},{-sin(-pi/4), cos(-pi/4), 0 , 0}, {0, 0, 1, 0}, {0,0,0,1}}
