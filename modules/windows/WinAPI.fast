@@ -213,3 +213,4 @@ S_FALSE: [1i32] func;
 {} Int32 {} "ReleaseCapture" importFunction
 {reserved: Natx;} Int32 {} "CoInitialize" importFunction
 {} () {} "CoUninitialize" importFunction
+{} Nat32 {} "GetTickCount" importFunction

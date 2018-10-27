@@ -16,4 +16,3 @@ vertices: (
   system: System;
   @system.run
 ] "main" exportFunction
-

@@ -117,8 +117,14 @@ System: [{
   keys: Cond 256 array dynamic;
   positionChanging: Cond dynamic;
   application: Application dynamic;
+  FRAME_DURATION: [0.0625r32] func;
+  time: Nat32;
+  frameTime: Real32;
+  physicsSpeed: Real32;
+
 
   INIT: [
+
     user32dll: "user32.dll" toUtf16 GetModuleHandleW;
     user32dll 0nx = ~ [
       "System::System, GetModuleHandleW failel" failProc
@@ -273,6 +279,10 @@ System: [{
     index pointerPosition @
   ] func;
 
+  getTime: [
+    GetTickCount
+  ] func;
+
   hasFocus: [
     [window 0nx = ~ (0n32 0n32) windowSize = ~ and] "No window or zero window" assert
     focus
@@ -345,6 +355,9 @@ System: [{
   ] func;
 
   run: [
+    getTime @time set
+    0.0r32 @frameTime set
+    1.0r32 @physicsSpeed set
     application0: Application;
     @self @application0.setSystem
     @application0 move @application set
@@ -363,6 +376,17 @@ System: [{
         ] while
 
         windowSize 0n32 dynamic 2 Vector = not stopped not and [
+          previousTime: time copy;
+          getTime @time set
+          frameDuration: time previousTime - Real32 cast 0.001r32 *;
+          additionalFrameTime: frameDuration FRAME_DURATION / physicsSpeed *;
+          frameTime additionalFrameTime + @frameTime set
+          [frameTime 1.0r32 < ~] [
+            @application.update
+            frameTime 1.0r32 - @frameTime set
+
+          ] while
+
           @application.onDraw
           stopped not [
             window GetDC SwapBuffers 1 = not [

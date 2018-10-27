@@ -17,7 +17,7 @@ Application: [{
     MainGame: 0n8;
     MainMenu: 1n8;
   };
-  
+
   currentState: Nat8;
 
   init: [
@@ -30,6 +30,13 @@ Application: [{
 
     GameState.MainGame currentState =
     [ MainGame.draw ] when
+  ] func;
+
+  update: [
+    system: getSystem;
+    "update" print LF print
+    #GameState.MainGame currentState =
+    #[ MainGame.upadate ] when
   ] func;
 
   onContextCreate: [
