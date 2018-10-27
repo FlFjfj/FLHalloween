@@ -6,7 +6,7 @@
 
 Program: {
   loadProgram: [
-    vshSource:fshSource:attributes:uniforms:;;;;
+    vshSource:fshSource:uniforms:;;;
     log: GLchar Array;
     4096 @log.resize
     logSize: Int32;
@@ -34,11 +34,11 @@ Program: {
 
     program: glCreateProgram;
 
-    attributes [
-      indexValue:;
-      attributeName: indexValue.value storageAddress Text cast;
-      attributeName indexValue.index GLuint cast program glBindAttribLocation
-    ] each
+    #attributes fieldCount [
+    #  attrubute: i @attributes @;
+    #  attributeName: indexValue.value storageAddress Text cast;
+    #  attributeName indexValue.index GLuint cast program glBindAttribLocation
+    #] times
 
     vertexShader program glAttachShader
     fragmentShader program glAttachShader
