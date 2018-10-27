@@ -7,16 +7,17 @@ WorldMap: [
   {
 
     staticMap:(
-      ( 0 1 0 )
-      ( 1 0 1 )
-      ( 0 1 0 )
-      ( 1 0 1 )
-      ( 0 1 0 )
+      (1 1 1 1 1 1)
+      (1 1 1 1 1 1)
+      (1 1 1 1 1 1)
+      (1 1 1 1 1 1)
+      (1 1 1 1 1 1)
     );
 
     mapWidth: 0 staticMap @ fieldCount;
     mapHeight: staticMap fieldCount;
-    R: 75i32;
+    R: 65i32;
+   
 
     shader: GLuint;
     projLoc: GLint;
@@ -47,25 +48,22 @@ WorldMap: [
 
 WorldTiles: {
 
+  width: 300.0r32;
+  height: 260.0r32;
+  sqrt32h: 3.0r32 sqrt height * 2.0r32 /;
+  
   init: [] func;
-
+  
   woodTrack: {
     texture: assets.woodTrack;
 
-    draw: [row: col: ;;
-      x: Real32;
-      y: Real32;
+    draw: [row: col: Real32 cast; Real32 cast;
       realR: R Real32 cast;
-      rootThree: 3.0r32 sqrt;
-      row 2 mod 1 = 
-      [col 2 * R * R + Real32 cast !x]
-      [col 3 * R * R + Real32 cast !x] 
-      if
-      col 2 mod 0 = 
-      [rootThree realR * row Real32 cast * !y]
-      [rootThree realR * row Real32 cast * rootThree 2.0r32 / realR * + !y ]
-      if
-      assets.woodTrack x y 150.0r32 130.0r32 0.0r32 modelLoc batch.draw
+      x: 1.5r32 WorldTiles.width * col * 
+         row Int32 cast 2 mod Real32 cast WorldTiles.sqrt32h * +;
+      y: row WorldTiles.height * 2.0r32 /;
+      
+      assets.woodTrack x y WorldTiles.width WorldTiles.height 0.0r32 modelLoc batch.draw
     ] func;
   };
 

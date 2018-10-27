@@ -43,8 +43,8 @@ orthographicCamera: [
   w:h:;;
 
   {
-    width: w; negWidth: 1.0r32 width /;
-    height: h; negHeight: 1.0r32 height /;
+    width: w; negWidth: 2.0r32 width /;
+    height: h; negHeight: 2.0r32 height /;
     x:y: 0.0r32 0.0r32;;
     zoom_val: 1.0r32;
     angle: 0.0r32;
@@ -90,13 +90,13 @@ orthographicCamera: [
 ] func;
 
 squreMesh: (
-  -1.0r32 -1.0r32 0.0r32 0.0r32 1.0r32
-   1.0r32 -1.0r32 0.0r32 1.0r32 1.0r32
-   1.0r32  1.0r32 0.0r32 1.0r32 0.0r32
-
-  -1.0r32 -1.0r32 0.0r32 0.0r32 1.0r32
-  -1.0r32  1.0r32 0.0r32 0.0r32 0.0r32
-   1.0r32  1.0r32 0.0r32 1.0r32 0.0r32
+  -0.5r32 -0.5r32 0.0r32 0.0r32 1.0r32
+   0.5r32 -0.5r32 0.0r32 1.0r32 1.0r32
+   0.5r32  0.5r32 0.0r32 1.0r32 0.0r32
+        
+  -0.5r32 -0.5r32 0.0r32 0.0r32 1.0r32
+  -0.5r32  0.5r32 0.0r32 0.0r32 0.0r32
+   0.5r32  0.5r32 0.0r32 1.0r32 0.0r32
 );
 
 spriteBatch: [{
