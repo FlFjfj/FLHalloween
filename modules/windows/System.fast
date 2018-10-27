@@ -75,6 +75,7 @@ ALT: [18i32] func;
 VOLUME_UP: [24i32] func;
 VOLUME_DOWN: [25i32] func;
 ESCAPE: [27i32] func;
+SPACE: [32i32] func;
 PAGE_UP: [33i32] func;
 PAGE_DOWN: [34i32] func;
 END: [35i32] func;
@@ -290,7 +291,7 @@ System: [{
 
   isKeyDown: [
     key:;
-    [key 256 < window 0nx = ~ (0n32 0n32) windowSize = ~ and] "error" assert
+    [key 256 < window 0nx = ~ and (0n32 0n32) windowSize = ~ and] "error" assert
     key keys @
   ] func;
 

@@ -32,6 +32,9 @@ MainMenu: {
   update: [
     "Menu update" print LF print
     @camera.update
+    SPACE system.isKeyDown  [
+      GameState.MainGame changeState
+    ] when
   ] func;
 
   enterState: [

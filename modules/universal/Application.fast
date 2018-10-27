@@ -102,8 +102,15 @@ Application: [{
   onKeyPress: [
     key: copy;
     DEBUG ["onKeyPress " print key print LF print] when
-    Cond
-    #TODO
+    key ESCAPE = [
+      currentState
+      (
+        GameState.MainMenu [@system.stop]
+        GameState.MainGame [GameState.MainMenu changeState]
+        ["invalid state" failProc]
+      ) case
+    ] when
+    TRUE
   ] func;
 
   onKeyRelease: [
