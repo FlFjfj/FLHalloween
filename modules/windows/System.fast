@@ -154,7 +154,7 @@ System: [{
   keys: Cond 256 array dynamic;
   positionChanging: Cond dynamic;
   application: Application dynamic;
-  FRAME_DURATION: 0.0400r32;
+  FRAME_DURATION: 0.1000r32;
   time: Real32;
   frameTime: Real32;
   physicsSpeed: Real32;

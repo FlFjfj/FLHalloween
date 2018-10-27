@@ -158,6 +158,13 @@ getRowCount: [isMatrix?] [fieldCount] pfunc;
   )
 ] pfunc;
 
+len: [isVector?] [
+  v:;
+  sum: 0.0r32 v fieldCount [i v @ i v @ * +] times;
+  sum sqrt
+] pfunc;
+
+normalize: [isVector?] [v:; v v len /] pfunc;
 
 trans: [
   v:;
@@ -418,3 +425,10 @@ translate2d: [
     (0.0r32 0.0r32 0.0r32 1.0r32)
   ) *
 ] func;
+
+print: [isVector?] [
+  v:; v fieldCount [
+    i v @ print " " print
+  ] times
+  LF print
+] pfunc;

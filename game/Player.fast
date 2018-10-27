@@ -1,42 +1,75 @@
 "player" module
 
 "control" useModule
+"algebra" useModule
 
 Player: [{
-    x: 0.0r32;
-    y: 0.0r32;
-    xSpeed: 500.0r32;
-    ySpeed: 500.0r32;
-    texture: GLuint;
-    shader: GLuint;
-    projLoc: GLint;
-    modelLoc: GLint;
+  speed: 400.0r32;
+  texture: GLuint;
+  shader: GLuint;
+  projLoc: GLint;
+  modelLoc: GLint;
+  state0: (Real32 Real32);
+  state1: (Real32 Real32);
+  size: 150.0r32;
 
-    size: 150.0r32;
-    
-    init: [
-      assets.playerBack copy !texture
-      PlayerStaticShader.shaderVert PlayerStaticShader.shaderFrag ( ("u_modelTrans" @modelLoc) ("u_projTrans" @projLoc) ) loadShader !shader
+  init: [
+    assets.playerBack copy !texture
+    PlayerStaticShader.shaderVert PlayerStaticShader.shaderFrag ( ("u_modelTrans" @modelLoc) ("u_projTrans" @projLoc) ) loadShader !shader
 
-      "Player model " print modelLoc print LF print
-      "Player proj " print projLoc print LF print
-    ] func;
+    "Player model " print modelLoc print LF print
+    "Player proj " print projLoc print LF print
+  ] func;
 
-    draw: [
-      shader glUseProgram
-      camera.getCombined GL_FALSE Nat8 cast 1i32 projLoc glUniformMatrix4fv
-      texture x y size size 0.0r32 modelLoc batch.draw
-      0n32 glUseProgram
-    ] func;
+  draw: [
+    shader glUseProgram
+    camera.getCombined GL_FALSE Nat8 cast 1i32 projLoc glUniformMatrix4fv
+    coords: state0 state1 state0 - frameTime * +;
+    texture coords unwind size size 0.0r32 modelLoc batch.draw
+    0n32 glUseProgram
+  ] func;
 
-    update: [
-      RIGHT system.isKeyDown [ x xSpeed FRAME_DURATION * + !x] when
-      LEFT system.isKeyDown [ x xSpeed FRAME_DURATION * - !x] when
-      UP system.isKeyDown [y ySpeed FRAME_DURATION * + !y] when
-      DOWN system.isKeyDown [y ySpeed  FRAME_DURATION * - !y] when
-    ] func;
-  }
-] func;
+  update: [
+    state1 @state0 set
+    direction: (0.0r32 0.0r32) dynamic;
+    RIGHT system.isKeyDown [
+      1.0r32 0 @direction @ set
+    ] when
+
+    LEFT system.isKeyDown [
+      -1.0r32 0 @direction @ set
+    ] when
+
+    UP system.isKeyDown [
+      1.0r32 1 @direction @ set
+    ] when
+
+    DOWN system.isKeyDown [
+      -1.0r32 1 @direction @ set
+    ] when
+
+    (0.0r32 0.0r32) direction = ~ [
+      dir: direction normalize;
+      change1: dir speed *;
+      change: change1 FRAME_DURATION *;
+      change state0 + @state1 set
+
+
+      print: [isVector?] [
+        v:; v fieldCount [
+          i v @ print " " print
+        ] times
+        LF print
+      ] pfunc;
+
+      "dir     " print dir print
+      "change1 " print change1 print
+      "change  " print change print
+      "state0  " print state0 print
+      "state1  " print state1 print
+    ] when
+  ] func;
+}] func;
 
 PlayerStaticShader: {
   shaderVert:
