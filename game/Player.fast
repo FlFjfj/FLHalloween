@@ -28,7 +28,6 @@ Player: [{
 
   speed: 400.0r32;
 
-
   init: [
     (
       assets.playerStand copy
@@ -50,7 +49,7 @@ Player: [{
     shader glUseProgram
     coords: state0 state1 state0 - frameTime * +;
     getTime timeLoc glUniform1f
-    camera.getCombined GL_FALSE Nat8 cast 1i32 projLoc glUniformMatrix4fv
+    camera.getCombined GL_TRUE Nat8 cast 1i32 projLoc glUniformMatrix4fv
     moveDir texture @ coords unwind PlayerConst.WIDTH PlayerConst.HEIGHT 0.0r32 modelLoc batch.draw
     0n32 glUseProgram
   ] func;
@@ -79,18 +78,29 @@ Player: [{
       PlayerConst.DIR_DOWN copy !moveDir
     ] when
 
-    (0.0r32 0.0r32) direction = ~ [ 
+    (0.0r32 0.0r32) direction = ~ [
       newState1: direction normalize speed * FRAME_DURATION * state0 +;
       newState1 toLegs isOnWall? ~ [
         newState1 @state1 set
       ] when
     ] when
+
+    cameraCoords: (MainGame.camera.x copy  MainGame.camera.y copy);
+    playerToCamera: state1 cameraCoords -;
+    #playerToCamera len WORLD_HEIGHT 2.0r32 / > [
+    #  newTranslate: playerToCamera normalize WORLD_HEIGHT 2.0r32 / * state1 +;
+    #  newTranslate unwind @MainGame.@camera.setTranslate
+    #] when
+
+    state0 @camera.@state0 set
+    state1 @camera.@state1 set
+    
   ] func;
 
   toLegs: [
     (0.0r32 PlayerConst.HEIGHT 2.0r32 /) -
   ] func;
-  
+
   isOnWall?: [
     coords:;
     map: MainGame.map;
@@ -99,16 +109,16 @@ Player: [{
       map.mapHeight [row: i;
         col row isWallTile? [
           tileCoords: col row map.staticMapCoordinates @ @;
-          coords tileCoords - len map.R Real32 cast < result or !result
+          coords tileCoords - len map.R Real32 cast 22.0r32 + < result or !result
         ] when
       ] times
     ] times
-    
+
     result
   ] func;
 
   isWallTile?: [
-    MainGame.map.staticMap @ @ 2 = 
+    MainGame.map.staticMap @ @ 2 =
   ] func;
 }] func;
 

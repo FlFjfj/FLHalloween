@@ -65,7 +65,7 @@ WorldMap: [
 
     drawFloor: [
       shader glUseProgram
-      camera.getCombined GL_FALSE Nat8 cast 1i32 projLoc glUniformMatrix4fv
+      camera.getCombined GL_TRUE Nat8 cast 1i32 projLoc glUniformMatrix4fv
       mapHeight [row: i dynamic;
         mapWidth [col: i dynamic;
           tileType: col row staticMap @ @;
@@ -79,7 +79,7 @@ WorldMap: [
 
     drawObj: [
       shader glUseProgram
-      camera.getCombined GL_FALSE Nat8 cast 1i32 projLoc glUniformMatrix4fv
+      camera.getCombined GL_TRUE Nat8 cast 1i32 projLoc glUniformMatrix4fv
       mapHeight [row: i dynamic;
         mapWidth [col: i dynamic;
           tileType: col row staticMap @ @;
@@ -94,46 +94,46 @@ WorldMap: [
     update: [
 
     ] func;
-    }
+  }
+] func;
+
+WorldTiles: {
+
+  width: 150.0r32;
+  height: 130.0r32;
+  sqrt32h: 3.0r32 sqrt height * 2.0r32 /;
+
+  init: [] func;
+
+  woodTrack: {
+    texture: assets.woodTrack;
+
+    draw: [row: col: Int32 cast; Int32 cast;
+      element: col row @staticMapCoordinates @ @;
+
+      assets.woodTrack 0 element @ 1 element @ WorldTiles.width WorldTiles.height 0.0r32 modelLoc batch.draw
+    ] func;
+  };
+
+  woodWall: {
+    drawFloor: [ row: col: Int32 cast; Int32 cast;
+      element: col row @staticMapCoordinates @ @;
+
+      assets.woodWallTile 0 element @ 1 element @ WorldTiles.width WorldTiles.height 0.0r32 modelLoc batch.draw
     ] func;
 
-    WorldTiles: {
+    drawObj: [ row: col: Int32 cast; Int32 cast;
+      element: col row @staticMapCoordinates @ @;
 
-      width: 150.0r32;
-      height: 130.0r32;
-      sqrt32h: 3.0r32 sqrt height * 2.0r32 /;
+      assets.woodWallObj 0 element @ 1 element @ WorldTiles.height 2.0r32 / + WorldTiles.width WorldTiles.height 2.0r32 * 0.0r32 modelLoc batch.draw
+    ] func;
 
-      init: [] func;
+  };
+};
 
-      woodTrack: {
-        texture: assets.woodTrack;
-
-        draw: [row: col: Int32 cast; Int32 cast;
-          element: col row @staticMapCoordinates @ @;
-
-          assets.woodTrack 0 element @ 1 element @ WorldTiles.width WorldTiles.height 0.0r32 modelLoc batch.draw
-        ] func;
-      };
-
-      woodWall: {
-        drawFloor: [ row: col: Int32 cast; Int32 cast;
-          element: col row @staticMapCoordinates @ @;
-
-          assets.woodWallTile 0 element @ 1 element @ WorldTiles.width WorldTiles.height 0.0r32 modelLoc batch.draw
-        ] func;
-
-        drawObj: [ row: col: Int32 cast; Int32 cast;
-          element: col row @staticMapCoordinates @ @;
-
-          assets.woodWallObj 0 element @ 1 element @ WorldTiles.height 2.0r32 / + WorldTiles.width WorldTiles.height 2.0r32 * 0.0r32 modelLoc batch.draw
-        ] func;
-
-      };
-    };
-
-    DefaultTileShader: {
-      shaderVert:
-      "
+DefaultTileShader: {
+  shaderVert:
+  "
 #version 330 core
 
   layout (location = 0) in vec3 aPosition;
@@ -150,8 +150,8 @@ WorldMap: [
   }
   ";
 
-      shaderFrag:
-      "
+  shaderFrag:
+  "
 #version 330 core
 
   precision mediump float;
@@ -165,4 +165,4 @@ WorldMap: [
     color = texture(u_Texture, vCoord);
   }
   ";
-    };
+};

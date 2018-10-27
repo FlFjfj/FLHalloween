@@ -6,9 +6,12 @@
 
 "assets" useModule
 
+WORLD_WIDTH: 1424.0r32;
+WORLD_HEIGHT: 728.0r32;
+
 MainMenu: {
   batch: spriteBatch;
-  camera: 1424.0r32 728.0r32 orthographicCamera;
+  camera: WORLD_WIDTH WORLD_HEIGHT orthographicCamera;
   shader: GLuint;
   projLoc: GLint;
   modelLoc: GLint;
@@ -21,6 +24,7 @@ MainMenu: {
 
   draw: [
    # "Menu draw" print LF print
+    @camera.beforeDraw
     GL_COLOR_BUFFER_BIT glClear
     shader glUseProgram
     camera.getCombined GL_FALSE Nat8 cast 1i32 projLoc glUniformMatrix4fv
@@ -40,7 +44,6 @@ MainMenu: {
     1.0r32 0.0r32 0.0r32 0.0r32 glClearColor
   ] func;
 };
-
 
 MainMenuStatic: {
   shaderVert:

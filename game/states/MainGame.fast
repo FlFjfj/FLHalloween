@@ -10,11 +10,14 @@
 "worldmap" useModule
 "player" useModule
 
+WORLD_WIDTH: 1424.0r32;
+WORLD_HEIGHT: 728.0r32;
+
 MainGame: {
 
   map: WorldMap;
   batch: spriteBatch;
-  camera: 1424.0r32 728.0r32 orthographicCamera;
+  camera: WORLD_WIDTH WORLD_HEIGHT orthographicCamera;
   startTime: Real32;
   player: Player;
 
@@ -30,6 +33,7 @@ MainGame: {
 
   draw: [
     GL_COLOR_BUFFER_BIT glClear
+    @camera.beforeDraw
     map.drawFloor
     player.draw
     map.drawObj

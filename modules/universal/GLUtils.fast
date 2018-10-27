@@ -43,12 +43,13 @@ orthographicCamera: [
   w:h:;;
 
   {
-    width: w; negWidth: 2.0r32 width /;
-    height: h; negHeight: 2.0r32 height /;
+    width: w copy; negWidth: 2.0r32 width /;
+    height: h copy; negHeight: 2.0r32 height /;
     x:y: 0.0r32 0.0r32;;
     zoom_val: 1.0r32;
     angle: 0.0r32;
-
+    state0: (Real32 Real32);
+    state1: (Real32 Real32);
     combined: Real32 4 4 Matrix;
 
     translate: [
@@ -58,45 +59,58 @@ orthographicCamera: [
     ] func;
 
     setTranslate: [
-      -1.0r32 * y!
-      -1.0r32 * x!
-    ] func;
-
-    rotate: [
-      dangle:;
-      angle dangle - !angle
-    ] func;
-
-    setRotation: [
-      -1.0r32 * !angle
+      neg !y
+      neg !x
     ] func;
 
     zoom: [
       zoom_val * !zoom_val
     ] func;
 
+    beforeDraw: [
+      state: state1 state0 - frameTime * state0 + -1.0r32 *;
+      x: 0 state @;
+      y: 1 state @;
+      (
+        (2.0r32 width / 0.0r32          0.0r32   x width 2.0r32 / /)
+        (0.0r32         2.0r32 height / 0.0r32   y height 2.0r32 / /)
+        (0.0r32         0.0r32          1.0r32   0.0r32)
+        (0.0r32         0.0r32          0.0r32   1.0r32)
+      ) !combined
+    ] func;
+
     update: [
-      ident
-      negWidth zoom_val * negHeight zoom_val * scale2d
-      angle rotate2d
-      x y translate2d
-      !combined
+      #(
+      #  (2.0r32 width / 0.0r32          0.0r32   x width 2.0r32 / /)
+      #  (0.0r32         2.0r32 height / 0.0r32   y height 2.0r32 / /)
+      #  (0.0r32         0.0r32          1.0r32   0.0r32)
+      #  (0.0r32         0.0r32          0.0r32   1.0r32)
+      #) !combined
     ] func;
 
     getCombined: [
+      #state: state1 state0 - FRAME_DURATION * state0 +;
+      #x: 0 state @;
+      #y: 1 state @;
+      #(
+      #  (2.0r32 width / 0.0r32          0.0r32   x width 2.0r32 / /)
+      #  (0.0r32         2.0r32 height / 0.0r32   y height 2.0r32 / /)
+      #  (0.0r32         0.0r32          1.0r32   0.0r32)
+      #  (0.0r32         0.0r32          0.0r32   1.0r32)
+      #) !combined
       combined storageAddress GLfloat Cref cast
     ] func;
-  } dynamic
+  }
 ] func;
 
 squreMesh: (
   -0.5r32 -0.5r32 0.0r32 0.0r32 1.0r32
-   0.5r32 -0.5r32 0.0r32 1.0r32 1.0r32
-   0.5r32  0.5r32 0.0r32 1.0r32 0.0r32
-        
+  0.5r32 -0.5r32 0.0r32 1.0r32 1.0r32
+  0.5r32  0.5r32 0.0r32 1.0r32 0.0r32
+
   -0.5r32 -0.5r32 0.0r32 0.0r32 1.0r32
   -0.5r32  0.5r32 0.0r32 0.0r32 0.0r32
-   0.5r32  0.5r32 0.0r32 1.0r32 0.0r32
+  0.5r32  0.5r32 0.0r32 1.0r32 0.0r32
 );
 
 spriteBatch: [{
@@ -137,4 +151,4 @@ spriteBatch: [{
 }
 ] func;
 
-unwind: [l:; l fieldCount [i @l @] times] func;
+unwind: [l:; l fieldCount [i @l @ copy] times] func;
