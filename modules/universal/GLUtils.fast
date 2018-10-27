@@ -52,11 +52,23 @@ orthographicCamera: [
     combined: Real32 4 4 Matrix;
 
     translate: [
-      y! x!
+      dx:dy:;;
+      x dx - !x
+      y dy - !y
+    ] func;
+
+    setTranslate: [
+      -1.0r32 * y!
+      -1.0r32 * x!
     ] func;
 
     rotate: [
-      !angle
+      dangle:;
+      angle dangle - !angle
+    ] func;
+
+    setRotation: [
+      -1.0r32 * !angle
     ] func;
 
     zoom: [
@@ -113,12 +125,12 @@ spriteBatch: [{
 
     texture GL_TEXTURE_2D glBindTexture
     model storageAddress GLfloat Cref cast GL_FALSE Nat8 cast 1i32 modelLoc glUniformMatrix4fv
-    
+
     6 0 GL_TRIANGLES glDrawArrays
 
     0n32 GL_TEXTURE_2D glBindTexture
     0n32 GL_ARRAY_BUFFER glBindBuffer
 
-    ] func;
-    }
-    ] func;
+  ] func;
+}
+] func;

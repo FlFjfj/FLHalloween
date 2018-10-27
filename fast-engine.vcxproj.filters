@@ -86,6 +86,9 @@
     <Fast Include="game\terrain\WorldMap.fast">
       <Filter>game\terrain</Filter>
     </Fast>
+    <Fast Include="game\Player.fast">
+      <Filter>game</Filter>
+    </Fast>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="sl">

@@ -1,0 +1,68 @@
+"player" module
+
+"control" useModule
+
+Player: [
+  {
+    x: 0.0r32;
+    y: 0.0r32;
+
+    texture: GLuint;
+    shader: GLuint;
+    projLoc: GLint;
+    modelLoc: GLint;
+
+    init: [
+      texture: assets.playerFront;
+      #vert frag ( ("u_modelTrans" @modelLoc) ("u_projTrans" @projLoc) ) loadShader !shader
+    ] func;
+
+    draw: [
+
+    ] func;
+
+    update: [
+      #shader glUseProgram
+      #camera.getCombined GL_FALSE Nat8 cast 1i32 projLoc glUniformMatrix4fv
+      #assets.woodTrack 0.0r32 0.0r32 150.0r32 130.0r32 0.0r32 modelLoc batch.draw
+      #0n32 glUseProgram
+    ] func;
+  }
+] func;
+
+PlayerStatic: {
+  shaderVert:
+  "
+#version 330 core
+
+  layout (location = 0) in vec3 aPosition;
+  layout (location = 1) in vec2 aCoord;
+
+  uniform mat4 u_projTrans;
+  uniform mat4 u_modelTrans;
+
+  out vec2 vCoord;
+  
+  void main() {
+    vCoord = aCoord;
+    gl_Position = u_projTrans * u_modelTrans * vec4(aPosition, 1.0);
+  }
+  ";
+
+  shaderFrag:
+  "
+#version 330 core
+
+  precision mediump float;
+  
+  in vec2 vCoord;
+  out vec4 color;
+  
+  uniform sampler2D u_Texture;
+  
+  void main() {
+    color = texture(u_Texture, vCoord);
+  }
+  ";
+
+};

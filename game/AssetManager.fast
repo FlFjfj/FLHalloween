@@ -13,4 +13,6 @@ initAssets: [
 assets: {
   woodTrack: Nat32;
   woodWall: Nat32;
+  
+  playerFront: Nat32;
 };
