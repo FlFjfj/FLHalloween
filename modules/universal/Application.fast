@@ -34,7 +34,8 @@ Application: [{
     system: getSystem;
 
     GameState.MainGame currentState =
-    [ @MainGame.draw ] when
+    [ @MainGame.draw ] 
+    when
   ] func;
 
   update: [

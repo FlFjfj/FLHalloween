@@ -31,7 +31,6 @@ MainGame: {
   draw: [
     GL_COLOR_BUFFER_BIT glClear
     map.draw
-    
     player.draw
   ] func;
 

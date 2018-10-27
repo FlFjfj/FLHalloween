@@ -3,20 +3,40 @@
 "control" useModule
 "assets" useModule
 
-staticMap:(
-  (1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 )
-  (1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 )
-);
-
 WorldMap: [
   {
 
-    init: [
+    staticMap:(
+      ( 0 1 0 )
+      ( 1 0 1 )
+      ( 0 1 0 )
+      ( 1 0 1 )
+      ( 0 1 0 )
+    );
 
+    mapWidth: 0 staticMap @ fieldCount;
+    mapHeight: staticMap fieldCount;
+    R: 75i32;
+
+    shader: GLuint;
+    projLoc: GLint;
+    modelLoc: GLint;
+
+    init: [
+      DefaultTileShader.shaderVert DefaultTileShader.shaderFrag ( ("u_modelTrans" @modelLoc) ("u_projTrans" @projLoc) ) loadShader !shader
     ] func;
 
     draw: [
+      shader glUseProgram
+      camera.getCombined GL_FALSE Nat8 cast 1i32 projLoc glUniformMatrix4fv
+      mapHeight [row: i dynamic;
+        mapWidth [col: i dynamic;
+          tileType: col row staticMap @ @;
+          tileType 1 = [ row col  WorldTiles.woodTrack.draw ]  [row col WorldTiles.woodWall.draw] if
 
+        ] times
+      ] times
+      0n32 glUseProgram
     ] func;
 
     update: [
@@ -26,13 +46,66 @@ WorldMap: [
 ] func;
 
 WorldTiles: {
-  woodTrack: [{
+
+  init: [] func;
+
+  woodTrack: {
     texture: assets.woodTrack;
 
-    draw: [] func;
-  }] func;
+    draw: [row: col: ;;
+      x: Real32;
+      y: Real32;
+      realR: R Real32 cast;
+      rootThree: 3.0r32 sqrt;
+      row 2 mod 1 = 
+      [col 2 * R * R + Real32 cast !x]
+      [col 3 * R * R + Real32 cast !x] 
+      if
+      col 2 mod 0 = 
+      [rootThree realR * row Real32 cast * !y]
+      [rootThree realR * row Real32 cast * rootThree 2.0r32 / realR * + !y ]
+      if
+      assets.woodTrack x y 150.0r32 130.0r32 0.0r32 modelLoc batch.draw
+    ] func;
+  };
 
-  woodWall: [{
+  woodWall: {
+    draw: [row: col: ;;] func;
+  };
+};
 
-  }] func;
+DefaultTileShader: {
+  shaderVert:
+  "
+#version 330 core
+
+  layout (location = 0) in vec3 aPosition;
+  layout (location = 1) in vec2 aCoord;
+
+  uniform mat4 u_projTrans;
+  uniform mat4 u_modelTrans;
+
+  out vec2 vCoord;
+  
+  void main() {
+    vCoord = aCoord;
+    gl_Position = u_projTrans * u_modelTrans * vec4(aPosition, 1.0);
+  }
+  ";
+
+  shaderFrag:
+  "
+#version 330 core
+
+  precision mediump float;
+  
+  in vec2 vCoord;
+  out vec4 color;
+  
+  uniform sampler2D u_Texture;
+  
+  void main() {
+    color = texture(u_Texture, vCoord);
+  }
+  ";
 };
