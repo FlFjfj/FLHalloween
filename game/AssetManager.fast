@@ -10,7 +10,7 @@ initAssets: [
   "assets/woodWallTile.png" loadTexture @assets.!woodWallTile
   "assets/woodWallObj.png" loadTexture @assets.!woodWallObj
 
-  "assets/pressSpace.png" loadTexture @assets.!menuImage
+  "assets/menuBackground.png" loadTexture @assets.!menuImage
 
   "assets/playerBack.png" loadTexture @assets.!playerBack
   "assets/playerFront.png" loadTexture @assets.!playerFront
