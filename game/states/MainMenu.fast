@@ -21,7 +21,7 @@ MainMenu: {
   ] func;
 
   draw: [
-    "Menu draw" print LF print
+   # "Menu draw" print LF print
     GL_COLOR_BUFFER_BIT glClear
     shader glUseProgram
     camera.getCombined GL_FALSE Nat8 cast 1i32 projLoc glUniformMatrix4fv
@@ -30,7 +30,7 @@ MainMenu: {
   ] func;
 
   update: [
-    "Menu update" print LF print
+   # "Menu update" print LF print
     @camera.update
     SPACE system.isKeyDown  [
       GameState.MainGame changeState
@@ -38,7 +38,7 @@ MainMenu: {
   ] func;
 
   enterState: [
-    1.0r32 0.0r32 0.0r32 1.0r32 glClearColor
+    1.0r32 0.0r32 0.0r32 0.0r32 glClearColor
   ] func;
 };
 
