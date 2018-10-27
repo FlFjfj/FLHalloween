@@ -8,11 +8,12 @@
 initAssets: [
   "assets/woodTrack.png" loadTexture @assets.!woodTrack
   "assets/woodWall.png" loadTexture @assets.!woodWall
+  "assets/pressSpace.png" loadTexture @assets.!menuImage
 ] func;
 
 assets: {
   woodTrack: Nat32;
   woodWall: Nat32;
-  
+  menuImage: Nat32;
   playerFront: Nat32;
 };

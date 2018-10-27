@@ -22,8 +22,12 @@ Application: [{
 
   changeState: [
     copy !currentState
-    GameState.MainGame currentState =
-    [ @MainGame.enterState ] when
+    currentState
+    (
+      GameState.MainMenu [@MainMenu.enterState]
+      GameState.MainGame [@MainGame.enterState]
+      ["invalid state" failProc]
+    ) case
   ] func;
 
   init: [
@@ -33,15 +37,22 @@ Application: [{
   draw: [
     system: getSystem;
 
-    GameState.MainGame currentState =
-    [ @MainGame.draw ] 
-    when
+    currentState
+    (
+      GameState.MainMenu [@MainMenu.draw]
+      GameState.MainGame [@MainGame.draw]
+      ["invalid state" failProc]
+    ) case
   ] func;
 
   update: [
     system: getSystem;
-    GameState.MainGame currentState =
-    [ @MainGame.update ] when
+    currentState
+    (
+      GameState.MainMenu [@MainMenu.update]
+      GameState.MainGame [@MainGame.update]
+      ["invalid state" failProc]
+    ) case
   ] func;
 
   onContextCreate: [
@@ -49,8 +60,8 @@ Application: [{
     GL_ONE_MINUS_SRC_ALPHA GL_SRC_ALPHA glBlendFunc
     initAssets
     @MainGame.init
-
-    GameState.MainGame changeState
+    @MainMenu.init
+    GameState.MainMenu changeState
   ] func;
 
   onClose: [

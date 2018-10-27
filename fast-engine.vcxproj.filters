@@ -89,6 +89,9 @@
     <Fast Include="game\Player.fast">
       <Filter>game</Filter>
     </Fast>
+    <Fast Include="game\states\MainMenu.fast">
+      <Filter>game\states</Filter>
+    </Fast>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="sl">

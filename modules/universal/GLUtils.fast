@@ -129,8 +129,8 @@ spriteBatch: [{
 
     6 0 GL_TRIANGLES glDrawArrays
 
-    0n32 GL_TEXTURE_2D glBindTexture
-    0n32 GL_ARRAY_BUFFER glBindBuffer
+    #0n32 GL_TEXTURE_2D glBindTexture
+    #0n32 GL_ARRAY_BUFFER glBindBuffer
 
   ] func;
 }
