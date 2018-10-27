@@ -3,26 +3,80 @@
 "control" useModule
 "string" useModule
 "opengl" useModule
+"glutils" useModule
+"program" useModule
 
 "assets" useModule
 "worldmap" useModule
 
 MainGame: {
-  
+
   map: WorldMap;
-  
+  batch: spriteBatch;
+  camera: 1424.0r32 728.0r32 orthographicCamera;
+
+  shader: GLuint;
+  projLoc: GLint;
+  modelLoc: GLint;
+
   init: [
-    map.init
-    "Game init" print LF print
+    @batch.init
+    @map.init
+    vert frag ( ("u_modelTrans" @modelLoc) ("u_projTrans" @projLoc) ) loadShader !shader
+  ] func;
+
+  enterState: [
+    1.0r32 0.0r32 0.0r32 0.0r32 glClearColor
   ] func;
 
   draw: [
-    map.draw
-    "Game draw" print LF print
+    GL_COLOR_BUFFER_BIT glClear
+    @map.draw
+
+    shader glUseProgram
+    camera.getCombined GL_FALSE Nat8 cast 1i32 projLoc glUniformMatrix4fv
+    assets.woodTrack 0.0r32 0.0r32 150.0r32 130.0r32 0.0r32 modelLoc batch.draw
+    0n32 glUseProgram
   ] func;
 
   update: [
-    map.update
-    "Game update" print LF print
+    @map.update
+    @camera.update
   ] func;
+
 };
+
+
+vert:
+"
+#version 330 core
+
+  layout (location = 0) in vec3 aPosition;
+  layout (location = 1) in vec2 aCoord;
+
+  uniform mat4 u_projTrans;
+  uniform mat4 u_modelTrans;
+
+  out vec2 vCoord;
+  
+  void main() {
+    vCoord = aCoord;
+    gl_Position = u_projTrans * u_modelTrans * vec4(aPosition, 1.0);
+  }
+  ";
+
+frag:
+"
+#version 330 core
+
+  precision mediump float;
+  
+  in vec2 vCoord;
+  out vec4 color;
+  
+  uniform sampler2D u_Texture;
+  
+  void main() {
+    color = texture(u_Texture, vCoord);
+  }
+  ";

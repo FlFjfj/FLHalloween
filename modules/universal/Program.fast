@@ -4,63 +4,55 @@
 "string" useModule
 "opengl" useModule
 
-Program: {
-  loadProgram: [
-    vshSource:fshSource:uniforms:;;;
-    log: GLchar Array;
-    4096 @log.resize
-    logSize: Int32;
-    vertexShader: GL_VERTEX_SHADER glCreateShader;
-    vshSourceSize: vshSource textSize Intx cast Int32 cast;
-    vshAsText: vshSource stringMemory Text cast;
-    vshSourceSize vshAsText 1 vertexShader glShaderSource
-    vertexShader glCompileShader
-    @log.getBufferBegin Text cast @logSize 4096 vertexShader glGetShaderInfoLog
-    logSize 0 = ~ [
-      vshSource print LF print
-      logSize @log.getBufferBegin Text Ref cast makeStringViewRaw print LF print
-    ] when
+loadShader: [
+  vshSource:fshSource:uniforms:;;;
+  log: GLchar Array;
+  4096 @log.resize
+  logSize: Int32;
+  vertexShader: GL_VERTEX_SHADER glCreateShader;
+  vshSourceSize: vshSource textSize Intx cast Int32 cast;
+  vshAsText: vshSource stringMemory Text cast;
+  vshSourceSize vshAsText 1 vertexShader glShaderSource
+  vertexShader glCompileShader
+  @log.getBufferBegin Text cast @logSize 4096 vertexShader glGetShaderInfoLog
+  logSize 0 = ~ [
+    vshSource print LF print
+    logSize @log.getBufferBegin Text Ref cast makeStringViewRaw print LF print
+  ] when
 
-    fragmentShader: GL_FRAGMENT_SHADER glCreateShader;
-    fshSourceSize: fshSource textSize Intx cast Int32 cast;
-    fshAsText: fshSource stringMemory Text cast;
-    fshSourceSize fshAsText 1 fragmentShader glShaderSource
-    fragmentShader glCompileShader
-    @log.getBufferBegin Text cast @logSize 4096 fragmentShader glGetShaderInfoLog
-    logSize 0 = ~ [
-      fshSource print LF print
-      logSize @log.getBufferBegin Text Ref cast makeStringViewRaw print LF print
-    ] when
+  fragmentShader: GL_FRAGMENT_SHADER glCreateShader;
+  fshSourceSize: fshSource textSize Intx cast Int32 cast;
+  fshAsText: fshSource stringMemory Text cast;
+  fshSourceSize fshAsText 1 fragmentShader glShaderSource
+  fragmentShader glCompileShader
+  @log.getBufferBegin Text cast @logSize 4096 fragmentShader glGetShaderInfoLog
+  logSize 0 = ~ [
+    fshSource print LF print
+    logSize @log.getBufferBegin Text Ref cast makeStringViewRaw print LF print
+  ] when
 
-    program: glCreateProgram;
+  program: glCreateProgram;
 
-    #attributes fieldCount [
-    #  attrubute: i @attributes @;
-    #  attributeName: indexValue.value storageAddress Text cast;
-    #  attributeName indexValue.index GLuint cast program glBindAttribLocation
-    #] times
+  vertexShader program glAttachShader
+  fragmentShader program glAttachShader
+  program glLinkProgram
+  @log.getBufferBegin Text cast @logSize 4096 program glGetProgramInfoLog
+  logSize 0 = ~ [
+    logSize @log.getBufferBegin Text Ref cast makeStringViewRaw print LF print
+  ] when
 
-    vertexShader program glAttachShader
-    fragmentShader program glAttachShader
-    program glLinkProgram
-    @log.getBufferBegin Text cast @logSize 4096 program glGetProgramInfoLog
-    logSize 0 = ~ [
-      logSize @log.getBufferBegin Text Ref cast makeStringViewRaw print LF print
-    ] when
+  linkStatus: Int32;
+  @linkStatus GL_LINK_STATUS program glGetProgramiv
+  linkStatus Nat32 cast GL_TRUE = ~ [
+    "glLinkProgram failed" print
+  ] when
 
-    linkStatus: Int32;
-    @linkStatus GL_LINK_STATUS program glGetProgramiv
-    linkStatus Nat32 cast GL_TRUE = ~ [
-      "glLinkProgram failed" print
-    ] when
+  uniforms fieldCount [
+    uniformName: 0 i uniforms @ @;
+    uniformLocation: 1 i @uniforms @ @;
+    location: uniformName program glGetUniformLocation;
+    location @uniformLocation set
+  ] times
 
-    uniforms fieldCount [
-      uniformName: 0 i uniforms @ @;
-      uniformLocation: 1 i @uniforms @ @;
-      location: uniformName storageAddress program glGetUniformLocation;
-      location @uniformLocation set
-    ] times
-
-    program
-  ] func;
-};
+  program
+] func;

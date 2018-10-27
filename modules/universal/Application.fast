@@ -20,28 +20,36 @@ Application: [{
 
   currentState: Nat8;
 
+  changeState: [
+    copy !currentState
+    GameState.MainGame currentState =
+    [ @MainGame.enterState ] when
+  ] func;
+
   init: [
     "Halloween" getSystem.setWindowName
-    GameState.MainGame copy !currentState
   ] func;
 
   draw: [
     system: getSystem;
 
     GameState.MainGame currentState =
-    [ MainGame.draw ] when
+    [ @MainGame.draw ] when
   ] func;
 
   update: [
     system: getSystem;
-    "update" print LF print
-    #GameState.MainGame currentState =
-    #[ MainGame.upadate ] when
+    GameState.MainGame currentState =
+    [ @MainGame.update ] when
   ] func;
 
   onContextCreate: [
+    GL_BLEND glEnable
+    GL_ONE_MINUS_SRC_ALPHA GL_SRC_ALPHA glBlendFunc
     initAssets
-    MainGame.init
+    @MainGame.init
+
+    GameState.MainGame changeState
   ] func;
 
   onClose: [

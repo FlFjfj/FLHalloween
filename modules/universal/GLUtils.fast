@@ -49,7 +49,7 @@ orthographicCamera: [
     zoom_val: 1.0r32;
     angle: 0.0r32;
 
-    combined: 4 4 Matrix;
+    combined: Real32 4 4 Matrix;
 
     translate: [
       y! x!
@@ -65,21 +65,60 @@ orthographicCamera: [
 
     update: [
       ident
-      negWeight zoom_val * negHeight zoom_val * scale2d
+      negWidth zoom_val * negHeight zoom_val * scale2d
       angle rotate2d
       x y translate2d !combined
     ] func;
 
-    getCombinedPtr: [
-      combined storageAddress combined storageSize
+    getCombined: [
+      combined storageAddress GLfloat Cref cast
     ] func;
   } dynamic
 ] func;
 
-spriteBatch: [
-  {
-    draw: [
-      texture:; x:; y:; angle:; modelLoc:;
+squreMesh: (
+  -1.0r32 -1.0r32 0.0r32 0.0r32 0.0r32
+  1.0r32 -1.0r32 0.0r32 1.0r32 0.0r32
+  1.0r32  1.0r32 0.0r32 1.0r32 1.0r32
+
+  -1.0r32  -1.0r32 0.0r32 0.0r32 0.0r32
+  -1.0r32   1.0r32 0.0r32 0.0r32 1.0r32
+  1.0r32   1.0r32 0.0r32 1.0r32 1.0r32
+);
+
+spriteBatch: [{
+  vbo: GLuint;
+
+  init: [
+    @vbo 1i32 glGenBuffers
+    vbo GL_ARRAY_BUFFER glBindBuffer
+    GL_STATIC_DRAW squreMesh storageAddress squreMesh storageSize Intx cast GL_ARRAY_BUFFER glBufferData
+    0n32 GL_ARRAY_BUFFER glBindBuffer
+  ] func;
+
+  draw: [
+    texture:x:y:width:height:angle:modelLoc:;;;;;;;
+
+    vbo GL_ARRAY_BUFFER glBindBuffer
+
+    model:ident
+    angle rotate2d
+    width height scale2d
+    x y translate2d;
+
+    0nx 5 4 * GL_FALSE GLboolean cast GL_FLOAT 3 0n32 glVertexAttribPointer
+    0n32 glEnableVertexAttribArray
+    3nx 4nx * 5 4 * GL_FALSE GLboolean cast GL_FLOAT 2 1n32 glVertexAttribPointer
+    1n32 glEnableVertexAttribArray
+
+    texture GL_TEXTURE_2D glBindTexture
+    model storageAddress GLfloat Cref cast GL_FALSE Nat8 cast 1i32 modelLoc glUniformMatrix4fv
+    
+    6 0 GL_TRIANGLES glDrawArrays
+
+    0n32 GL_TEXTURE_2D glBindTexture
+    0n32 GL_ARRAY_BUFFER glBindBuffer
+
     ] func;
-  }
-] func;
+    }
+    ] func;

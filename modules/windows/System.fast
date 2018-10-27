@@ -1495,7 +1495,7 @@ glGetUniformiv: 0nx @glGetUniformiv_func cast;
 
 {
   program: GLuint;
-  name: Natx;
+  name: Text;
 } GLint {} [
   program:;
   name:;
