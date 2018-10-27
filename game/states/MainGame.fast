@@ -36,8 +36,9 @@ MainGame: {
 
   update: [
     @map.update
-    @camera.update
     @player.update
+    
+    @camera.update
   ] func;
 
 };

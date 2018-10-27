@@ -77,9 +77,9 @@ orthographicCamera: [
 
     update: [
       ident
-      x y translate2d
       negWidth zoom_val * negHeight zoom_val * scale2d
       angle rotate2d
+      x y translate2d
       !combined
     ] func;
 
@@ -90,13 +90,13 @@ orthographicCamera: [
 ] func;
 
 squreMesh: (
-  -0.5r32 -0.5r32 0.0r32 0.0r32 0.0r32
-   0.5r32 -0.5r32 0.0r32 1.0r32 0.0r32
-   0.5r32  0.5r32 0.0r32 1.0r32 1.0r32
+  -0.5r32 -0.5r32 0.0r32 0.0r32 1.0r32
+   0.5r32 -0.5r32 0.0r32 1.0r32 1.0r32
+   0.5r32  0.5r32 0.0r32 1.0r32 0.0r32
 
-  -0.5r32 -0.5r32 0.0r32 0.0r32 0.0r32
-  -0.5r32  0.5r32 0.0r32 0.0r32 1.0r32
-   0.5r32  0.5r32 0.0r32 1.0r32 1.0r32
+  -0.5r32 -0.5r32 0.0r32 0.0r32 1.0r32
+  -0.5r32  0.5r32 0.0r32 0.0r32 0.0r32
+   0.5r32  0.5r32 0.0r32 1.0r32 0.0r32
 );
 
 spriteBatch: [{
@@ -117,7 +117,8 @@ spriteBatch: [{
     model:ident
     x y translate2d
     angle rotate2d
-    width height scale2d;
+    width height scale2d
+    ;
 
     0nx 5 4 * GL_FALSE GLboolean cast GL_FLOAT 3 0n32 glVertexAttribPointer
     0n32 glEnableVertexAttribArray
@@ -129,8 +130,8 @@ spriteBatch: [{
 
     6 0 GL_TRIANGLES glDrawArrays
 
-    #0n32 GL_TEXTURE_2D glBindTexture
-    #0n32 GL_ARRAY_BUFFER glBindBuffer
+    0n32 GL_TEXTURE_2D glBindTexture
+    0n32 GL_ARRAY_BUFFER glBindBuffer
 
   ] func;
 }

@@ -7,13 +7,24 @@
 
 initAssets: [
   "assets/woodTrack.png" loadTexture @assets.!woodTrack
-  "assets/woodWall.png" loadTexture @assets.!woodWall
+  "assets/woodWallTile.png" loadTexture @assets.!woodWallTile
+  "assets/woodWallObj.png" loadTexture @assets.!woodWallObj
+
   "assets/pressSpace.png" loadTexture @assets.!menuImage
+
+  "assets/playerBack.png" loadTexture @assets.!playerBack
+  "assets/playerFront.png" loadTexture @assets.!playerFront
+  "assets/playerSide.png" loadTexture @assets.!playerSide
 ] func;
 
 assets: {
   woodTrack: Nat32;
-  woodWall: Nat32;
-  menuImage: Nat32;
+  woodWallTile: Nat32;
+  woodWallObj: Nat32;
+
+  playerBack: Nat32;
   playerFront: Nat32;
+  playerSide: Nat32;
+
+  menuImage: Nat32;
 };

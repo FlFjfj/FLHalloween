@@ -13,24 +13,27 @@ Player: [
     modelLoc: GLint;
 
     init: [
-      texture: assets.playerFront;
-      #vert frag ( ("u_modelTrans" @modelLoc) ("u_projTrans" @projLoc) ) loadShader !shader
+      assets.playerBack copy !texture
+      PlayerStaticShader.shaderVert PlayerStaticShader.shaderFrag ( ("u_modelTrans" @modelLoc) ("u_projTrans" @projLoc) ) loadShader !shader
+
+      "Player model " print modelLoc print LF print
+      "Player proj " print projLoc print LF print
     ] func;
 
     draw: [
-
+      shader glUseProgram
+      camera.getCombined GL_FALSE Nat8 cast 1i32 projLoc glUniformMatrix4fv
+      texture x y 150.0r32 150.0r32 0.0r32 modelLoc batch.draw
+      0n32 glUseProgram
     ] func;
 
     update: [
-      #shader glUseProgram
-      #camera.getCombined GL_FALSE Nat8 cast 1i32 projLoc glUniformMatrix4fv
-      #assets.woodTrack 0.0r32 0.0r32 150.0r32 130.0r32 0.0r32 modelLoc batch.draw
-      #0n32 glUseProgram
+
     ] func;
   }
 ] func;
 
-PlayerStatic: {
+PlayerStaticShader: {
   shaderVert:
   "
 #version 330 core
