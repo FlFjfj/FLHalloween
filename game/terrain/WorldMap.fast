@@ -15,7 +15,11 @@ WorldMap: [
     );
 
     mapWidth: 0 staticMap @ fieldCount;
+
     mapHeight: staticMap fieldCount;
+
+    staticMapCoordinates: (Real32 Real32) mapWidth mapHeight Matrix;
+
     R: 65i32;
 
 
@@ -25,6 +29,19 @@ WorldMap: [
 
     init: [
       DefaultTileShader.shaderVert DefaultTileShader.shaderFrag ( ("u_modelTrans" @modelLoc) ("u_projTrans" @projLoc) ) loadShader !shader
+      mapHeight [row: i dynamic;
+        mapWidth [col: i dynamic;
+          element: col row @staticMapCoordinates @ @;
+
+          realR: R Real32 cast;
+          x: 1.5r32 WorldTiles.width * col Real32 cast *
+          row Int32 cast 2 mod Real32 cast WorldTiles.sqrt32h * +;
+          y: row Real32 cast WorldTiles.height * 2.0r32 /;
+
+          (x copy y copy) @element set
+
+        ] times
+      ] times
     ] func;
 
     draw: [
@@ -57,24 +74,18 @@ WorldTiles: {
   woodTrack: {
     texture: assets.woodTrack;
 
-    draw: [row: col: Real32 cast; Real32 cast;
-      realR: R Real32 cast;
-      x: 1.5r32 WorldTiles.width * col *
-      row Int32 cast 2 mod Real32 cast WorldTiles.sqrt32h * +;
-      y: row WorldTiles.height * 2.0r32 /;
+    draw: [row: col: Int32 cast; Int32 cast;
+      element: col row @staticMapCoordinates @ @;
 
-      assets.woodTrack x y WorldTiles.width WorldTiles.height 0.0r32 modelLoc batch.draw
+      assets.woodTrack 0 element @ 1 element @ WorldTiles.width WorldTiles.height 0.0r32 modelLoc batch.draw
     ] func;
   };
 
   woodWall: {
-    draw: [row: col: Real32 cast; Real32 cast;
-      realR: R Real32 cast;
-      x: 1.5r32 WorldTiles.width * col *
-      row Int32 cast 2 mod Real32 cast WorldTiles.sqrt32h * +;
-      y: row WorldTiles.height * 2.0r32 /;
+    draw: [ row: col: Int32 cast; Int32 cast;
+      element: col row @staticMapCoordinates @ @;
 
-      assets.woodWallTile x y WorldTiles.width WorldTiles.height 0.0r32 modelLoc batch.draw
+      assets.woodWallTile 0 element @ 1 element @ WorldTiles.width WorldTiles.height 0.0r32 modelLoc batch.draw
     ] func;
   };
 };
