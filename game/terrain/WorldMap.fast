@@ -3,16 +3,14 @@
 "control" useModule
 "assets" useModule
 
-(
-  (1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 ) 
+staticMap:(
   (1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 )
-)
+  (1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 )
+);
 
 WorldMap: [
   {
-    
-        
-    
+
     init: [
 
     ] func;
@@ -29,7 +27,7 @@ WorldMap: [
 
 WorldTiles: {
   woodTrack: [{
-    texture:;
+    texture: assets.woodTrack;
 
     draw: [] func;
   }] func;
