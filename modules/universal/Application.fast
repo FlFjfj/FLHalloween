@@ -9,7 +9,6 @@
 
 Application: [{
   systemRef: Natx;
-
   setSystem: [storageAddress @systemRef set] func;
   getSystem: [systemRef System Ref cast] func;
 

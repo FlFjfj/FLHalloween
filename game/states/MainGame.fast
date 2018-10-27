@@ -15,7 +15,7 @@ MainGame: {
   map: WorldMap;
   batch: spriteBatch;
   camera: 1424.0r32 728.0r32 orthographicCamera;
-  
+  startTime: Real32;
   player: Player;
 
   init: [

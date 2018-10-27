@@ -9,7 +9,6 @@
 MainMenu: {
   batch: spriteBatch;
   camera: 1424.0r32 728.0r32 orthographicCamera;
-
   shader: GLuint;
   projLoc: GLint;
   modelLoc: GLint;

@@ -155,7 +155,7 @@ System: [{
   positionChanging: Cond dynamic;
   application: Application dynamic;
   FRAME_DURATION: 0.0400r32;
-  time: Nat32;
+  time: Real32;
   frameTime: Real32;
   physicsSpeed: Real32;
 
@@ -317,7 +317,7 @@ System: [{
   ] func;
 
   getTime: [
-    GetTickCount
+    time
   ] func;
 
   hasFocus: [
@@ -392,7 +392,7 @@ System: [{
   ] func;
 
   run: [
-    getTime @time set
+    GetTickCount Real32 cast 0.001r32 * !time
     0.0r32 @frameTime set
     1.0r32 @physicsSpeed set
     application0: Application;
@@ -414,15 +414,15 @@ System: [{
 
         windowSize 0n32 dynamic 2 Vector = not stopped not and [
           previousTime: time copy;
-          getTime @time set
-          frameDuration: time previousTime - Real32 cast 0.001r32 *;
-          frameDuration copy !FRAME_DURATION
+          GetTickCount Real32 cast 0.001r32 * @time set
+          frameDuration: time previousTime -;
+          #frameDuration copy !FRAME_DURATION
           additionalFrameTime: frameDuration FRAME_DURATION / physicsSpeed *;
-          #frameTime additionalFrameTime + @frameTime set
-          #[frameTime 1.0r32 < ~] [
+          frameTime additionalFrameTime + !frameTime
+          [frameTime 1.0r32 < ~] [
             @application.update
-           # frameTime 1.0r32 - @frameTime set
-          #] while
+            frameTime 1.0r32 - @frameTime set
+          ] while
 
            @application.onDraw
           stopped not [
