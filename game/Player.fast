@@ -165,7 +165,7 @@ Player: [{
   ] func;
 
   isWallTile?: [ col: row:;;
-   col row @MainGame.map.staticMap @ @ 2 =  col row @MainGame.map.staticMap @ @ 3 = or col row @MainGame.map.staticMap @ @ 5 = or
+   col row @MainGame.map.staticMap @ @ 2 =  col row @MainGame.map.staticMap @ @ 3 = or col row @MainGame.map.staticMap @ @ 5 = or col row @MainGame.map.staticMap @ @ 6 = or
 
   ] func;
 }] func;

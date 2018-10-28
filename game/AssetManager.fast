@@ -18,6 +18,9 @@ initAssets: [
   
   "assets/menuBackground.png" loadTexture @assets.!menuImage
 
+  "assets/storeTile.png" loadTexture @assets.!storeWallObj
+  
+  
   "assets/playerBack.png" loadTexture @assets.!playerBack
   "assets/playerFront.png" loadTexture @assets.!playerFront
   "assets/playerSideLeft.png" loadTexture @assets.!playerSideLeft
@@ -38,6 +41,7 @@ assets: {
   woodTrack: Nat32;
   woodWallTile: Nat32;
   woodWallObj: Nat32;
+  storeWallObj: Nat32;
   
   homeTrack: Nat32;
   homeWallObj: Nat32;
