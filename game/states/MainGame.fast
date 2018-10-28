@@ -52,7 +52,14 @@ MainGame: {
     
     @map.update
     @player.update
-    monsters fieldCount [i @monsters @ .update] times
+    nMonsters: Monster Array;
+    monsters fieldCount [
+      i @monsters @ .update [
+        i @monsters @ @nMonsters.pushBack
+      ] when
+    ] times
+    
+    nMonsters @monsters set
     @camera.update
   ] func;
 

@@ -15,7 +15,7 @@ PumpkinVars: {
   timeLoc: GLint;
   projLoc: GLint;
   modelLoc: GLint;
-
+  damage: 0.6r32;
   textures: (2 [GLuint] times);
 };
 
@@ -40,10 +40,19 @@ Pumpkin: [{
     newState: direction PumpkinVars.PUMPKIN_SPEED * FRAME_DURATION * position_new +;
     position_new copy !position
     newState     copy !position_new
-    isOnWall? ~
+    collided: FALSE;
+    monsters fieldCount [
+      monster: i @monsters @;
+      monster.state1 state1 - len PumpkinVars.PUMPKIN_WIDTH < [
+        monster.health PumpkinVars.damage - @monster.@health set
+        TRUE !collided
+      ] when
+    ] times
+
+    isOnWall? not collided not and
   ] func;
 
-   isOnWall?: [
+  isOnWall?: [
     coords: position_new;
     map: MainGame.map;
     result: FALSE;
@@ -58,7 +67,7 @@ Pumpkin: [{
 
     result
   ] func;
-  
+
 }] func;
 
 PumpkinStaticShader: {

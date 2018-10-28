@@ -11,7 +11,7 @@ getRandomCoords: [
 Monster: [{
   state0: getRandomCoords;
   state1: state0 copy;
-
+  health: 1.0r32;
   moveDir: MonsterConst.DIR_NONE copy;
   speed: 200.0r32;
 
@@ -52,6 +52,7 @@ Monster: [{
     MonsterConst.DIR_NONE copy !moveDir
     state1 @state0 set
     direction: player.state1 state1 -;
+
     0 direction @ 1.0r32 > [
       MonsterConst.DIR_RIGHT copy !moveDir
     ] when
@@ -67,13 +68,15 @@ Monster: [{
     1 direction @ -1.0r32 < [
       MonsterConst.DIR_DOWN copy !moveDir
     ] when
-    
+
     (0.0r32 0.0r32) direction = ~ [
       newState1: direction normalize speed * FRAME_DURATION * state0 +;
       newState1 toLegs isOnWall? ~ [
         newState1 @state1 set
       ] when
     ] when
+    
+    health 0.0r32 >
   ] func;
 
   toLegs: [

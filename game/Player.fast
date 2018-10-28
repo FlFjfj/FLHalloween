@@ -33,7 +33,7 @@ Player: [{
   shader: GLuint;
   state0: (Real32 Real32);
   state1: (Real32 Real32);
-
+  health: 1.0r32;
   moveDir: PlayerConst.DIR_NONE copy;
 
   timeLoc: GLint;
@@ -134,13 +134,13 @@ Player: [{
     ] when
 
     lived: (0.0r32 0.0r32) (0.0r32 0.0r32) createPumpkin Array;
-    pumpkins fieldCount [ 
+    pumpkins fieldCount [
       i @pumpkins.at pumpkin:; @pumpkin.update
       [
         pumpkin copy @lived.pushBack
       ] when
     ] times
-    
+
     lived copy !pumpkins
   ] func;
 
