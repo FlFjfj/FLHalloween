@@ -16,7 +16,7 @@ PlayerConst: {
   DIR_LEFT:  3;
   DIR_RIGHT: 4;
 
-  PUMPKIN_RELOAD: 20n32;
+  PUMPKIN_RELOAD: 10n32;
 };
 
 PlayerControls: {
@@ -133,8 +133,15 @@ Player: [{
       ] when
     ] when
 
-
-    pumpkins fieldCount [ i @pumpkins.at .update ] times
+    lived: (0.0r32 0.0r32) (0.0r32 0.0r32) createPumpkin Array;
+    pumpkins fieldCount [ 
+      i @pumpkins.at pumpkin:; @pumpkin.update
+      [
+        pumpkin copy @lived.pushBack
+      ] when
+    ] times
+    
+    lived copy !pumpkins
   ] func;
 
   toLegs: [
@@ -168,7 +175,7 @@ PlayerAnimatedShader: {
   #version 330 core
   
   #define FRAME_COUNT 4.0
-  #define FRAME_TIME 0.15
+  #define FRAME_TIME 0.01
   
   layout (location = 0) in vec3 aPosition;
   layout (location = 1) in vec2 aCoord;
@@ -218,10 +225,8 @@ SubResourceInit: [
   ) loadShader @PumpkinVars.!shader
 
   (
-    assets.pumpkinLeft copy
-    assets.pumpkinRight copy
-    assets.pumpkinUp copy
-    assets.pumpkinDown copy
+    assets.pumpkinVert copy
+    assets.pumpkinHoriz copy
   ) @PumpkinVars.!textures
 ] func;
 

@@ -9,35 +9,27 @@
 PumpkinVars: {
   PUMPKIN_WIDTH: 50.0r32;
   PUMPKIN_HEIGHT: 50.0r32;
-  
+  PUMPKIN_SPEED: 600.0r32;
+
   shader: GLuint;
   timeLoc: GLint;
   projLoc: GLint;
   modelLoc: GLint;
 
-  textures: (4 [GLuint] times);
+  textures: (2 [GLuint] times);
 };
 
 Pumpkin: [{
   position:direction: copy; copy;
-  new_position: position copy;
+  position_new: position copy;
   texture: 0i32;
 
-  0 direction @ 0.0r32 <
-  [ 0i32 !texture ] when
-
-  0 direction @ 0.0r32 >
+  0 direction @ 0.0r32 = ~
   [ 1i32 !texture ] when
-
-  1 direction @ 0.0r32 <
-  [ 2i32 !texture ] when
-
-  1 direction @ 0.0r32 >
-  [ 3i32 !texture ] when
 
   draw: [
     PumpkinVars.shader glUseProgram
-    coords: position new_position position - frameTime * +;
+    coords: position position_new position - frameTime * +;
     getTime PumpkinVars.timeLoc glUniform1f
     camera.getCombined GL_TRUE Nat8 cast 1i32 PumpkinVars.projLoc glUniformMatrix4fv
     texture PumpkinVars.textures @ coords unwind PumpkinVars.PUMPKIN_WIDTH PumpkinVars.PUMPKIN_HEIGHT 0.0r32 PumpkinVars.modelLoc batch.draw
@@ -45,9 +37,28 @@ Pumpkin: [{
   ] func;
 
   update: [
-
+    newState: direction PumpkinVars.PUMPKIN_SPEED * FRAME_DURATION * position_new +;
+    position_new copy !position
+    newState     copy !position_new
+    isOnWall? ~
   ] func;
 
+   isOnWall?: [
+    coords: position_new;
+    map: MainGame.map;
+    result: FALSE;
+    map.mapWidth [col: i;
+      map.mapHeight [row: i;
+        col row isWallTile? [
+          tileCoords: col row map.staticMapCoordinates @ @;
+          coords tileCoords - len map.R Real32 cast 25.0r32 + < result or !result
+        ] when
+      ] times
+    ] times
+
+    result
+  ] func;
+  
 }] func;
 
 PumpkinStaticShader: {

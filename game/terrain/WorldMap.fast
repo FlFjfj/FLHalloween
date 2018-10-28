@@ -5,8 +5,6 @@
 
 WorldMap: [
   {
-    
-    
     staticMap:(
       (2 2 2 2 2 2 2 2 2)
       (2 2 2 2 2 2 2 2 2)
@@ -34,7 +32,6 @@ WorldMap: [
 
     R: 65i32;
 
-
     shader: GLuint;
     projLoc: GLint;
     modelLoc: GLint;
@@ -49,7 +46,6 @@ WorldMap: [
           x: 1.5r32 WorldTiles.width * col Real32 cast *
           row Int32 cast 2 mod Real32 cast WorldTiles.sqrt32h * + ;
           y: row Real32 cast WorldTiles.height * 2.0r32 / ;
-          
           
 
           (x copy y copy) @element set
@@ -76,8 +72,7 @@ WorldMap: [
       mapHeight [row: i dynamic;
         mapWidth [col: i dynamic;
           tileType: col row staticMap @ @;
-          tileType 1 = [ row col  WorldTiles.woodTrack.draw ]  [row col WorldTiles.woodWall.drawFloor] if
-
+          tileType 1 = [row col WorldTiles.woodTrack.draw ]  [row col WorldTiles.woodWall.drawFloor] if
         ] times
       ] times
       0n32 glUseProgram
