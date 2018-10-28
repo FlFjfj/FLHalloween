@@ -19,8 +19,9 @@ MainGame: {
   batch: spriteBatch;
   camera: WORLD_WIDTH WORLD_HEIGHT orthographicCamera;
   startTime: Real32;
+  
   player: Player;
-
+  
   init: [
     @batch.init
     @map.init
@@ -45,5 +46,52 @@ MainGame: {
     
     @camera.update
   ] func;
+
+};
+
+PumpkinAnimatedShader: {
+  shaderVert:
+  "
+  #version 330 core
+  
+  #define FRAME_COUNT 7.0
+  #define FRAME_TIME 0.15
+  
+  layout (location = 0) in vec3 aPosition;
+  layout (location = 1) in vec2 aCoord;
+
+  uniform mat4 u_projTrans;
+  uniform mat4 u_modelTrans;
+  uniform float u_Time;
+  
+  out vec2 vCoord;
+  flat out float vFrame;
+  
+  void main() {
+    vFrame = int((u_Time - int(u_Time)) * FRAME_COUNT);
+    vCoord = aCoord;
+    gl_Position = u_projTrans * u_modelTrans * vec4(aPosition, 1.0);
+  }
+  ";
+
+  shaderFrag:
+  "
+  #version 330 core
+
+  #define FRAME_COUNT 7.0 
+  
+  precision mediump float;
+  
+  in vec2 vCoord;
+  flat in float vFrame;
+  
+  out vec4 color;
+  
+  uniform sampler2D u_Texture;
+  
+  void main() {
+    color = texture(u_Texture, vec2((vCoord.x + vFrame) / FRAME_COUNT), vCoord.y);
+  }
+  ";
 
 };

@@ -37,6 +37,7 @@
     <Fast Include="modules\windows\OpenGL.fast" />
     <Fast Include="modules\windows\System.fast" />
     <Fast Include="modules\windows\WinAPI.fast" />
+    <Fast Include="skills\Pumpkin.fast" />
     <Fast Include="sl\array.fast" />
     <Fast Include="sl\ascii.fast" />
     <Fast Include="sl\avlMap.fast" />

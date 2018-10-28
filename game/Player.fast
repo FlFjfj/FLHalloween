@@ -2,6 +2,9 @@
 
 "control" useModule
 "algebra" useModule
+"array" useModule
+
+
 
 PlayerConst: {
   WIDTH: 100.0r32;
@@ -12,6 +15,17 @@ PlayerConst: {
   DIR_DOWN:  2;
   DIR_LEFT:  3;
   DIR_RIGHT: 4;
+
+  PUMPKIN_RELOAD: 20n32;
+};
+
+PlayerControls: {
+  keyLeft: Int32;
+  keyRight: Int32;
+  keyUp: Int32;
+  keyDown: Int32;
+
+  useFirst: Int32;
 };
 
 Player: [{
@@ -28,6 +42,9 @@ Player: [{
 
   speed: 400.0r32;
 
+  pumpkinTimer: 0n32;
+  pumpkins: (0.0r32 0.0r32) (0.0r32 0.0r32) Pumpkin Array;
+
   init: [
     (
       assets.playerStand copy
@@ -43,6 +60,14 @@ Player: [{
       ("u_Time" @timeLoc)
     ) loadShader !shader
 
+    LEFT @PlayerControls.!keyLeft
+    RIGHT @PlayerControls.!keyRight
+    UP @PlayerControls.!keyUp
+    DOWN @PlayerControls.!keyDown
+    KEY_M @PlayerControls.!useFirst
+
+    SubResourceInit
+    
   ] func;
 
   draw: [
@@ -52,28 +77,30 @@ Player: [{
     camera.getCombined GL_TRUE Nat8 cast 1i32 projLoc glUniformMatrix4fv
     moveDir texture @ coords unwind PlayerConst.WIDTH PlayerConst.HEIGHT 0.0r32 modelLoc batch.draw
     0n32 glUseProgram
+
+    pumpkins fieldCount [ i pumpkins.at .draw ] times
   ] func;
 
   update: [
     PlayerConst.DIR_NONE copy !moveDir
     state1 @state0 set
     direction: (0.0r32 0.0r32) dynamic;
-    RIGHT system.isKeyDown [
+    PlayerControls.keyRight system.isKeyDown [
       1.0r32 0 @direction @ set
       PlayerConst.DIR_RIGHT copy !moveDir
     ] when
 
-    LEFT system.isKeyDown [
+    PlayerControls.keyLeft system.isKeyDown [
       -1.0r32 0 @direction @ set
       PlayerConst.DIR_LEFT copy !moveDir
     ] when
 
-    UP system.isKeyDown [
+    PlayerControls.keyUp system.isKeyDown [
       1.0r32 1 @direction @ set
       PlayerConst.DIR_UP copy !moveDir
     ] when
 
-    DOWN system.isKeyDown [
+    PlayerControls.keyDown system.isKeyDown [
       -1.0r32 1 @direction @ set
       PlayerConst.DIR_DOWN copy !moveDir
     ] when
@@ -94,7 +121,20 @@ Player: [{
 
     state0 @camera.@state0 set
     state1 @camera.@state1 set
-    
+
+    pumpkinTimer 1n32 + !pumpkinTimer
+
+    PlayerControls.useFirst system.isKeyDown
+    [
+      pumpkinTimer PlayerConst.PUMPKIN_RELOAD >
+      [
+        0n32 !pumpkinTimer
+        state1 direction normalize createPumpkin @pumpkins.pushBack
+      ] when
+    ] when
+
+
+    pumpkins fieldCount [ i @pumpkins.at .update ] times
   ] func;
 
   toLegs: [
@@ -168,3 +208,17 @@ PlayerAnimatedShader: {
   ";
 
 };
+
+SubResourceInit: [
+  PumpkinStaticShader.shaderVert PumpkinStaticShader.shaderFrag
+    (
+      ("u_modelTrans" @PumpkinVars.@modelLoc)
+      ("u_projTrans" @PumpkinVars.@projLoc)
+      ("u_Time" @PumpkinVars.@timeLoc)
+    ) loadShader @PumpkinVars.!shader
+
+] func;
+
+createPumpkin: [
+  Pumpkin
+] func;
