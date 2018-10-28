@@ -23,6 +23,7 @@ MainGame: {
   lastMonsterTime: Real32;
   player: Player;
   monsters: Monster Array;
+  gui: GUI;
   
   lightSys: LightSystem;
   
@@ -32,6 +33,7 @@ MainGame: {
     @map.init
     @player.init
     Monster.init
+    @gui.init
   ] func;
 
   enterState: [
@@ -46,6 +48,7 @@ MainGame: {
     monsters fieldCount [i monsters @ .draw] times
     map.drawObj
     sys: lightSys;
+    gui.draw
   ] func;
 
   update: [

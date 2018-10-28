@@ -9,6 +9,7 @@
 "gameover" useModule
 "assets" useModule
 "opengl" useModule
+"glutils" useModule
 
 Application: [{
   systemRef: Natx;

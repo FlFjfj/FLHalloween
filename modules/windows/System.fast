@@ -8,6 +8,7 @@
 "glwrapper" useModule
 "opengl" useModule
 "winapi" useModule
+"glutils" useModule
 
 # fills the struct with type check
 makeStruct: [
