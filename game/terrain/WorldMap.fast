@@ -6,19 +6,58 @@
 WorldMap: [
   {
     staticMap:(
-      (2 2 2 2 2 2 2 2 2)
-      (2 2 2 2 2 2 2 2 2)
-      (2 1 1 1 1 1 1 1 1)
-      (2 1 1 1 1 1 1 1 2)
-      (2 1 2 1 1 1 1 1 2)
-      (2 1 1 1 1 1 1 1 2)
-      (2 1 1 1 1 1 1 1 2)
-      (2 1 1 1 1 1 1 1 2)
-      (2 1 2 1 1 1 1 1 2)
-      (2 1 1 1 1 1 1 1 2)
-      (2 1 1 1 1 1 1 1 2)
-      (2 2 2 2 2 2 2 2 2)
-      (2 2 2 2 2 2 2 2 2)
+      (2 2 2 2 2 2 2 2 2 2 2 2 2 2)
+      (2 2 2 2 2 2 2 2 2 2 2 2 2 2)
+      (2 1 1 1 2 2 2 2 2 2 1 1 1 2)
+      (2 1 1 1 1 1 1 1 2 2 1 1 1 2)
+      (2 1 1 1 1 1 1 1 2 2 1 1 1 2)
+      (2 1 1 1 1 1 1 1 2 2 1 1 1 2)
+      (2 1 1 1 2 2 2 2 2 2 1 1 1 2)
+      (2 1 1 1 2 2 2 2 2 2 1 1 1 2)
+      (2 1 1 1 2 2 2 2 2 2 1 1 1 2)
+      (2 1 1 1 2 2 2 2 2 2 1 1 1 2)
+      (2 1 1 1 1 1 1 1 1 1 1 1 1 2)
+      (2 1 1 1 1 1 1 1 1 1 1 1 1 2)
+      (2 1 1 1 2 2 2 2 2 2 1 1 1 2)
+      (2 1 1 1 2 2 2 2 2 2 1 1 1 2)
+      (2 1 1 1 2 1 1 1 1 2 1 1 1 2)
+      (2 1 1 1 2 1 1 1 1 2 1 1 1 2)
+      (2 1 1 1 2 1 1 1 1 2 1 1 1 2)
+      (2 1 1 1 2 1 2 1 1 2 1 1 1 2)
+      (2 1 1 1 1 1 2 1 1 2 1 1 1 2)
+      (2 1 1 1 1 1 1 1 1 2 1 1 1 2)
+      (2 1 1 1 2 1 1 1 1 2 1 1 1 2)
+      (2 1 1 1 2 1 1 1 1 2 1 1 1 2)
+      (2 1 1 1 1 1 1 1 1 1 1 1 1 2)
+      (2 1 1 1 1 1 2 1 1 1 1 1 1 2)
+      (2 1 1 1 1 1 2 1 1 1 2 1 1 2)
+      (2 1 1 1 1 1 2 2 2 1 2 1 1 2)
+      (2 1 1 1 1 1 1 2 1 1 2 1 1 2)
+      (2 1 1 1 1 1 1 1 1 1 2 1 1 2)
+      (2 1 2 2 2 2 1 1 1 1 2 1 1 2)
+      (2 1 2 2 2 2 1 1 1 1 2 1 1 2)
+      (2 1 1 1 1 1 1 1 1 1 2 1 1 2)
+      (2 1 1 1 1 1 1 1 1 1 2 1 1 2)
+      (2 1 1 1 1 1 1 1 1 1 2 1 1 2)
+      (2 1 1 1 1 1 1 1 1 1 2 1 1 2)
+      (2 1 1 1 1 1 1 1 1 1 1 1 1 2)
+      (2 1 1 1 2 2 2 2 2 2 1 1 1 2)
+      (2 1 1 1 2 2 2 2 2 2 1 1 1 2)
+      (2 1 1 1 2 2 2 2 2 2 1 1 1 2)
+      (2 1 1 1 1 1 2 2 2 2 1 1 1 2)
+      (2 1 1 1 1 1 1 1 2 2 1 1 1 2)
+      (2 1 1 1 1 2 1 1 2 2 1 1 1 2)
+      (2 1 1 1 1 1 1 1 2 2 1 1 1 2)
+      (2 1 1 1 1 1 2 2 2 2 1 1 1 2)
+      (2 1 1 1 2 2 2 2 2 2 1 1 1 2)
+      (2 1 1 1 2 2 2 2 2 2 1 1 1 2)
+      (2 1 1 1 2 2 2 2 2 2 1 1 1 2)
+      (2 1 1 1 2 2 2 2 2 2 1 1 1 2)
+      (2 1 1 1 2 2 1 1 1 1 1 1 1 2)
+      (2 1 1 1 2 2 1 1 1 1 1 1 1 2)
+      (2 1 1 1 2 2 1 1 1 1 1 1 1 2)
+      (2 2 2 2 2 2 2 2 2 2 2 2 2 2)
+      (2 2 2 2 2 2 2 2 2 2 2 2 2 2)
     );
 
     mapWidth: 0 staticMap @ fieldCount;
@@ -46,7 +85,7 @@ WorldMap: [
           x: 1.5r32 WorldTiles.width * col Real32 cast *
           row Int32 cast 2 mod Real32 cast WorldTiles.sqrt32h * + ;
           y: row Real32 cast WorldTiles.height * 2.0r32 / ;
-          
+
 
           (x copy y copy) @element set
 
@@ -72,7 +111,8 @@ WorldMap: [
       mapHeight [row: i dynamic;
         mapWidth [col: i dynamic;
           tileType: col row staticMap @ @;
-          tileType 1 = [row col WorldTiles.woodTrack.draw ]  [row col WorldTiles.woodWall.drawFloor] if
+          coords: col row staticMapCoordinates @ @;
+          tileType 1 = [coords WorldTiles.woodTrack.draw ]  [] if
         ] times
       ] times
       0n32 glUseProgram
@@ -110,26 +150,23 @@ WorldTiles: {
   woodTrack: {
     texture: assets.woodTrack;
 
-    draw: [row: col: Int32 cast; Int32 cast;
-      element: col row @staticMapCoordinates @ @;
-
-      assets.woodTrack 0 element @ 1 element @ WorldTiles.width WorldTiles.height 0.0r32 modelLoc batch.draw
+    draw: [
+      coords:;
+      MainGame.map.shader glUseProgram
+      assets.woodTrack coords unwind WorldTiles.width WorldTiles.height 0.0r32 MainGame.map.modelLoc batch.draw
+      0n32 glUseProgram
     ] func;
   };
 
   woodWall: {
-    drawFloor: [ row: col: Int32 cast; Int32 cast;
-      element: col row @staticMapCoordinates @ @;
-
-      assets.woodWallTile 0 element @ 1 element @ WorldTiles.width WorldTiles.height 0.0r32 modelLoc batch.draw
+    draw: [
+      coords:;
+      MainGame.map.shader glUseProgram
+      camera.getCombined GL_TRUE Nat8 cast 1i32 MainGame.map.projLoc glUniformMatrix4fv
+      assets.woodWallTile coords unwind WorldTiles.width WorldTiles.height 0.0r32 MainGame.map.modelLoc batch.draw
+      assets.woodWallObj coords unwind WorldTiles.height 2.0r32 / + WorldTiles.width WorldTiles.height 2.0r32 * 0.0r32 MainGame.map.modelLoc batch.draw
+      0n32 glUseProgram
     ] func;
-
-    drawObj: [ row: col: Int32 cast; Int32 cast;
-      element: col row @staticMapCoordinates @ @;
-
-      assets.woodWallObj 0 element @ 1 element @ WorldTiles.height 2.0r32 / + WorldTiles.width WorldTiles.height 2.0r32 * 0.0r32 modelLoc batch.draw
-    ] func;
-
   };
 };
 

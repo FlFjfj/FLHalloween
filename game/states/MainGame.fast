@@ -38,9 +38,73 @@ MainGame: {
     GL_COLOR_BUFFER_BIT glClear
     @camera.beforeDraw
     map.drawFloor
-    player.draw
-    monsters fieldCount [i monsters @ .draw] times
-    map.drawObj
+    #player.draw
+    #monsters fieldCount [i monsters @ .draw] times
+    objects: Int32 Natx Real32 Renderable Array;
+    PLAYER_TYPE player storageAddress 1 player.state1 @ Renderable @objects.pushBack
+    map.mapWidth [col: i;
+      map.mapHeight [row: i;
+        type: Int32; ptr: Natx; y: Real32; include: FALSE;
+        col row map.staticMap @ @ (
+          1 [TILE1_TYPE @type set FALSE !include]
+          2 [TILE2_TYPE @type set TRUE !include]
+          []
+        ) case
+
+        include [
+          col row map.staticMapCoordinates @ @ storageAddress !ptr
+          1 col row map.staticMapCoordinates @ @ @ copy !y
+          type ptr y Renderable @objects.pushBack
+        ] when
+      ] times
+    ] times
+    
+    player.pumpkins fieldCount [
+      pumpkin: i player.pumpkins @;
+      PUMPKIN_TYPE pumpkin storageAddress 1 pumpkin.position @ Renderable @objects.pushBack
+    ] times
+
+    monsters fieldCount [
+      monster: i monsters @;
+      MONSTER_TYPE monster storageAddress 1 monster.state1 @ Renderable @objects.pushBack
+    ] times
+
+    <: ["IS_RENDERABLE" has] [
+      a:b:;;
+      a.y b.y >
+    ] pfunc;
+
+    objectsRange: @objects makeArrayRange;
+    @objectsRange.heapSort
+    objects fieldCount [
+      renderable: i objects @;
+      renderable.type (
+        PLAYER_TYPE [
+          plr: renderable.ptr Player Cref cast;
+          plr.draw
+        ]
+
+        MONSTER_TYPE [
+          plr: renderable.ptr Monster Cref cast;
+          plr.draw
+        ]
+
+        PUMPKIN_TYPE [
+          plr: renderable.ptr Real32 2 Vector Real32 2 Vector Pumpkin Cref cast;
+          plr.draw
+        ]
+
+        TILE1_TYPE [
+        ]
+        
+        TILE2_TYPE [
+           plr: renderable.ptr (Real32 Real32) Cref cast;
+           plr WorldTiles.woodWall.draw
+        ]
+        []
+      ) case
+    ] times
+
   ] func;
 
   update: [
@@ -49,7 +113,7 @@ MainGame: {
       time @lastMonsterTime set
       Monster @monsters.pushBack
     ] when
-    
+
     @map.update
     @player.update
     nMonsters: Monster Array;
@@ -58,11 +122,21 @@ MainGame: {
         i @monsters @ @nMonsters.pushBack
       ] when
     ] times
-    
+
     nMonsters @monsters set
     @camera.update
   ] func;
 
+  PLAYER_TYPE: 0;
+  MONSTER_TYPE: 1;
+  PUMPKIN_TYPE: 2;
+  TILE1_TYPE: 3;
+  TILE2_TYPE: 4;
+
+  Renderable: [{
+    virtual IS_RENDERABLE: ();
+    type:ptr:y: copy; copy; copy;
+  }] func;
 };
 
 PumpkinAnimatedShader: {
