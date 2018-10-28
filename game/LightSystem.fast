@@ -24,15 +24,12 @@ LightSystem: [{
       ] when
     ] times
 
-    result -1 = not 
-    ["Reserved " print result print LF print] when
     result
   ] func;
 
   freeLight: [
     i:;
     0.0r32 i @used @ set
-    "Freed " print i print LF print
   ] func;
 
   getPosition: [position storageAddress Real32 Cref cast] func;

@@ -282,7 +282,7 @@ DefaultTileShader: {
     }  
   
     vec4 texColor = texture(u_Texture, vCoord);
-    color = vec4(texColor.xyz * lightColor, texColor.a);
+    color = vec4(mix(texColor.xyz * lightColor, texColor.xyz, 0.05), texColor.a);
   }
   ";
 };

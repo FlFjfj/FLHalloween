@@ -15,6 +15,10 @@ PumpkinVars: {
   timeLoc: GLint;
   projLoc: GLint;
   modelLoc: GLint;
+  lightUsedLoc: GLint;
+  lightPosLoc: GLint;
+  lightRadLoc: GLint;
+  lightColorLoc: GLint;
   damage: 0.251r32;
   textures: (2 [GLuint] times);
 };
@@ -23,6 +27,15 @@ Pumpkin: [{
   position:direction: copy; copy;
   position_new: position copy;
   texture: 0i32;
+  lamp: 0i32;
+
+  @lightSys.reserveLight !lamp
+  lamp -1i32 = neg
+  [
+    (0.7r32 0.7r32 0.0r32) lamp @lightSys.@color @ set
+    100.0r32 lamp @lightSys.@radius @ set
+    coords lamp @lightSys.@position @ set
+  ] when
 
   0 direction @ 0.0r32 = ~
   [ 1i32 !texture ] when
@@ -35,10 +48,21 @@ Pumpkin: [{
   draw: [
     PumpkinVars.shader glUseProgram
     coords: position position_new position - frameTime * +;
+
     getTime PumpkinVars.timeLoc glUniform1f
     camera.getCombined GL_TRUE Nat8 cast 1i32 PumpkinVars.projLoc glUniformMatrix4fv
+    lightSys.getColor    lightSys.MAXIMUM lightColorLoc glUniform3fv
+    lightSys.getPosition lightSys.MAXIMUM lightPosLoc   glUniform2fv
+    lightSys.getRadius   lightSys.MAXIMUM lightRadLoc   glUniform1fv
+    lightSys.getUsed     lightSys.MAXIMUM lightUsedLoc  glUniform1fv
+
     texture PumpkinVars.textures @ coords unwind PumpkinVars.PUMPKIN_WIDTH PumpkinVars.PUMPKIN_HEIGHT 0.0r32 PumpkinVars.modelLoc batch.draw
     0n32 glUseProgram
+    lamp -1 = not
+    [
+      coords lamp @lightSys.@position @ set
+    ] when
+
   ] func;
 
   update: [
@@ -55,6 +79,10 @@ Pumpkin: [{
     ] times
 
     isOnWall? not collided not and
+    isAlive:;
+    isAlive not lamp -1 = not and
+    [lamp @lightSys.freeLight] when
+    isAlive
   ] func;
 
   isOnWall?: [
@@ -81,7 +109,7 @@ PumpkinStaticShader: {
   #version 330 core
   
   #define FRAME_COUNT 7.0
-  #define FRAME_TIME 0.15
+  #define FRAME_TIME 0.05
   
   layout (location = 0) in vec3 aPosition;
   layout (location = 1) in vec2 aCoord;
@@ -91,12 +119,15 @@ PumpkinStaticShader: {
   uniform float u_Time;
   
   out vec2 vCoord;
+  out vec2 worldCoord;
   flat out float vFrame;
   
   void main() {
     vFrame = int((u_Time - int(u_Time)) * FRAME_COUNT);
     vCoord = aCoord;
-    gl_Position = u_projTrans * u_modelTrans * vec4(aPosition, 1.0);
+    vec4 position = u_modelTrans * vec4(aPosition, 1.0);
+    worldCoord = position.xy;
+    gl_Position = u_projTrans * position;
   }
   ";
 
@@ -109,14 +140,28 @@ PumpkinStaticShader: {
   precision mediump float;
   
   in vec2 vCoord;
+  in vec2 worldCoord;
   flat in float vFrame;
   
   out vec4 color;
   
   uniform sampler2D u_Texture;
+  uniform vec2  u_position[32];
+  uniform vec3  u_color[32];
+  uniform float u_radius[32];
+  uniform float u_used[32];
   
   void main() {
-    color = texture(u_Texture, vec2((vCoord.x + vFrame) / FRAME_COUNT, vCoord.y));
+    vec3 lightColor = vec3(0.0);
+    for(int i = 0; i < 32; i++) {
+      if(u_used[i] == 1.0){
+        float len = clamp(1.0 - length(worldCoord - u_position[i]) / u_radius[i], 0.0, 1.0);
+        lightColor = lightColor + u_color[i] * len * len;
+      }
+    }
+  
+    vec4 texColor = texture(u_Texture, vec2((vCoord.x + vFrame) / FRAME_COUNT, vCoord.y));
+    color = vec4(mix(texColor.xyz * lightColor, texColor.xyz, 0.05), texColor.a);
   }
   ";
 };
