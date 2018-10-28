@@ -13,24 +13,34 @@ GUI: [{
   modelLoc: GLint;
   healthLoc: GLint;
   speed: 400.0r32;
-  fbo: GLuint;
-  fbTex: GLuint;
+  fboHP: GLuint;
+  fbTexHP: GLuint;
+  fboEXP: GLuint;
+  fbTexEXP: GLuint;
   init: [
-    300 30 generateFramebuffer !fbTex !fbo  
+    300 30 generateFramebuffer !fbTexHP !fboHP  
+    300 30 generateFramebuffer !fbTexEXP !fboEXP 
+    
+    fboHP GL_FRAMEBUFFER glBindFramebuffer
+    1.0r32 0.0r32 0.0r32 1.0r32 glClearColor
+    GL_COLOR_BUFFER_BIT glClear
+    
+    fboEXP GL_FRAMEBUFFER glBindFramebuffer
+    1.0r32 0.0r32 1.0r32 0.0r32 glClearColor
+    GL_COLOR_BUFFER_BIT glClear
+    
+    0n32 GL_FRAMEBUFFER glBindFramebuffer
+    0.0r32 0.0r32 0.0r32 0.0r32 glClearColor
+    
     hpShaderSrc.shaderVert hpShaderSrc.shaderFrag ( ("u_modelTrans" @modelLoc) ("u_projTrans" @projLoc) ) loadShader !shader
   ] func;
   
   draw: [
-    
-    fbo GL_FRAMEBUFFER glBindFramebuffer
-    1.0r32 0.0r32 0.0r32 1.0r32 glClearColor
-    GL_COLOR_BUFFER_BIT glClear
-    0n32 GL_FRAMEBUFFER glBindFramebuffer
-    1.0r32 0.0r32 0.0r32 0.0r32 glClearColor
     shader glUseProgram
     camera.getCombined GL_TRUE Nat8 cast 1i32 projLoc glUniformMatrix4fv
-    coords: player.state1 player.state0 - frameTime * player.state0 + (400.0r32 300.0r32) -;
-    fbTex coords unwind 300.0r32 player.health * 30.0r32 0.0r32 modelLoc batch.draw
+    center: player.state1 player.state0 - frameTime * player.state0 +;
+    fbTexHP center (400.0r32 300.0r32) - unwind 300.0r32 player.health * 30.0r32 0.0r32 modelLoc batch.draw
+    fbTexEXP center (400.0r32 260.0r32) - unwind 300.0r32 player.exp * 30.0r32 0.0r32 modelLoc batch.draw
     0n32 glUseProgram
   ] func;
 

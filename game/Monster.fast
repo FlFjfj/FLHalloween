@@ -72,16 +72,25 @@ Monster: [{
       MonsterConst.DIR_DOWN copy !moveDir
     ] when
 
-     direction len PlayerConst.WIDTH 2.0r32 / > [
+    direction len PlayerConst.WIDTH 2.0r32 / > [
       newState1: direction normalize speed * FRAME_DURATION * state0 +;
       newState1 toLegs isOnWall? ~ [
         newState1 @state1 set
       ] when
     ] [
-      player.health FRAME_DURATION - @player.@health set
+      player.health FRAME_DURATION MonsterConst.SECONDS_TO_KILL / - @player.!health
     ] if
-    
-    health 0.0r32 >
+
+    dies: health 0.0r32 <;
+    dies [
+      player.exp MonsterConst.EXP_FOR_KILL + @player.!exp
+      player.exp 1.0r32 > [
+        1.0r32  @player.!exp
+      ] when
+      "monster dead, player total exp: " print player.exp print LF print
+    ] when
+
+    dies not
   ] func;
 
   toLegs: [
@@ -110,6 +119,8 @@ Monster: [{
 }] func;
 
 MonsterConst: {
+  EXP_FOR_KILL: 0.3r32;
+  SECONDS_TO_KILL: 3.0r32;
   initialized: FALSE;
   texture: (5 [GLuint] times);
   shader: GLuint;

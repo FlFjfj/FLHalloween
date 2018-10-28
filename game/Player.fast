@@ -34,6 +34,7 @@ Player: [{
   state0: (Real32 Real32);
   state1: (Real32 Real32);
   health: 1.0r32;
+  exp: 0.0r32;
   moveDir: PlayerConst.DIR_NONE copy;
 
   timeLoc: GLint;
