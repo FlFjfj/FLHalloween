@@ -9,7 +9,13 @@ initAssets: [
   "assets/woodTrack.png" loadTexture @assets.!woodTrack
   "assets/woodWallTile.png" loadTexture @assets.!woodWallTile
   "assets/woodWallObj.png" loadTexture @assets.!woodWallObj
-
+  
+  "assets/homeWallObj.png" loadTexture @assets.!homeWallObj
+  "assets/homeTrack.png" loadTexture @assets.!homeTrack
+  "assets/homeWallTile.png" loadTexture @assets.!homeWallTile
+  
+  "assets/graveTile.png" loadTexture @assets.!graveWallTile
+  
   "assets/menuBackground.png" loadTexture @assets.!menuImage
 
   "assets/playerBack.png" loadTexture @assets.!playerBack
@@ -32,7 +38,13 @@ assets: {
   woodTrack: Nat32;
   woodWallTile: Nat32;
   woodWallObj: Nat32;
-
+  
+  homeTrack: Nat32;
+  homeWallObj: Nat32;
+  homeWallTile: Nat32;
+  
+  graveWallTile: Nat32;
+  
   playerStand: Nat32;
   playerBack: Nat32;
   playerFront: Nat32;

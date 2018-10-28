@@ -6,19 +6,22 @@
 WorldMap: [
   {
     staticMap:(
-      (2 2 2 2 2 2 2 2 2)
-      (2 2 2 2 2 2 2 2 2)
-      (2 1 1 1 1 1 1 1 1)
-      (2 1 1 1 1 1 1 1 2)
-      (2 1 2 1 1 1 1 1 2)
-      (2 1 1 1 1 1 1 1 2)
-      (2 1 1 1 1 1 1 1 2)
-      (2 1 1 1 1 1 1 1 2)
-      (2 1 2 1 1 1 1 1 2)
-      (2 1 1 1 1 1 1 1 2)
-      (2 1 1 1 1 1 1 1 2)
-      (2 2 2 2 2 2 2 2 2)
-      (2 2 2 2 2 2 2 2 2)
+      (2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
+      (2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
+      (2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2)
+      (2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2)
+      (2 2 1 1 1 1 1 1 1 1 1 1 2 1 5 1 1 5 1 1 2 2)
+      (2 2 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 5 1 2 2)
+      (2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 2 2)
+      (2 2 1 1 1 1 3 3 1 1 1 1 1 1 1 1 1 1 1 1 2 2)
+      (2 2 1 1 1 1 1 4 1 1 1 1 1 1 1 1 1 1 1 1 2 2)
+      (2 2 1 1 1 1 1 4 1 1 1 1 1 1 2 1 1 1 1 1 2 2)
+      (2 2 1 1 1 1 3 4 1 1 1 1 1 1 1 3 3 1 1 1 2 2)
+      (2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 3 1 1 1 2 2)
+      (2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 3 1 1 1 1 2 2)
+      (2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 4 4 1 1 1 2 2)
+      (2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
+      (2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
     );
 
     mapWidth: 0 staticMap @ fieldCount;
@@ -46,7 +49,7 @@ WorldMap: [
           x: 1.5r32 WorldTiles.width * col Real32 cast *
           row Int32 cast 2 mod Real32 cast WorldTiles.sqrt32h * + ;
           y: row Real32 cast WorldTiles.height * 2.0r32 / ;
-          
+
 
           (x copy y copy) @element set
 
@@ -69,10 +72,15 @@ WorldMap: [
     drawFloor: [
       shader glUseProgram
       camera.getCombined GL_TRUE Nat8 cast 1i32 projLoc glUniformMatrix4fv
-      mapHeight [row: i dynamic;
+      mapHeight [row: mapHeight  i - 1 -  dynamic;
         mapWidth [col: i dynamic;
           tileType: col row staticMap @ @;
-          tileType 1 = [row col WorldTiles.woodTrack.draw ]  [row col WorldTiles.woodWall.drawFloor] if
+          tileType 1 = [row col WorldTiles.woodTrack.draw ]  when # [row col WorldTiles.woodWall.drawFloor] if
+          tileType 2 = [row col WorldTiles.woodWall.drawFloor] when
+          tileType 3 = [row col WorldTiles.homeWallObj.drawFloor] when
+          tileType 4 = [row col WorldTiles.homeTrack.draw] when
+          tileType 5 = [ row col WorldTiles.graveWallTile.drawFloor] when
+          
         ] times
       ] times
       0n32 glUseProgram
@@ -82,11 +90,12 @@ WorldMap: [
     drawObj: [
       shader glUseProgram
       camera.getCombined GL_TRUE Nat8 cast 1i32 projLoc glUniformMatrix4fv
-      mapHeight [row: i dynamic;
+      mapHeight [row: mapHeight i - 1 - dynamic;
         mapWidth [col: i dynamic;
           tileType: col row staticMap @ @;
-          tileType 2 = [ row col  WorldTiles.woodWall.drawObj]  [] if
-
+          tileType 2 = [ row col  WorldTiles.woodWall.drawObj] when
+          tileType 3 = [ row col WorldTiles.homeWallObj.drawObj] when
+          
         ] times
       ] times
       0n32 glUseProgram
@@ -117,6 +126,18 @@ WorldTiles: {
     ] func;
   };
 
+
+  homeTrack: {
+    texture: assets.homeTrack;
+
+    draw: [row: col: Int32 cast; Int32 cast;
+      element: col row @staticMapCoordinates @ @;
+
+      assets.homeTrack 0 element @ 1 element @ WorldTiles.width WorldTiles.height 0.0r32 modelLoc batch.draw
+    ] func;
+  };
+
+
   woodWall: {
     drawFloor: [ row: col: Int32 cast; Int32 cast;
       element: col row @staticMapCoordinates @ @;
@@ -130,7 +151,42 @@ WorldTiles: {
       assets.woodWallObj 0 element @ 1 element @ WorldTiles.height 2.0r32 / + WorldTiles.width WorldTiles.height 2.0r32 * 0.0r32 modelLoc batch.draw
     ] func;
 
+
   };
+
+
+  homeWallObj: {
+    
+    drawFloor: [ row: col: Int32 cast; Int32 cast;
+      element: col row @staticMapCoordinates @ @;
+
+      assets.homeWallTile 0 element @ 1 element @ WorldTiles.width WorldTiles.height 0.0r32 modelLoc batch.draw
+    ] func;
+
+    drawObj: [ row: col: Int32 cast; Int32 cast;
+      element: col row @staticMapCoordinates @ @;
+
+      assets.homeWallObj 0 element @ 1 element @ WorldTiles.height 2.0r32 / + WorldTiles.width WorldTiles.height 2.0r32 * 0.0r32 modelLoc batch.draw
+    ] func;
+
+
+  };
+  
+  
+    graveWallTile: {
+    
+   
+   drawFloor: [ row: col: Int32 cast; Int32 cast;
+      element: col row @staticMapCoordinates @ @;
+
+      assets.graveWallTile 0 element @ 1 element @ WorldTiles.width WorldTiles.height 0.0r32 modelLoc batch.draw
+    ] func;
+  
+
+  };
+
+
+
 };
 
 DefaultTileShader: {
