@@ -54,7 +54,7 @@ MainGame: {
       time @lastMonsterTime set
       Monster @monsters.pushBack
     ] when
-    
+
     @map.update
     @player.update
     nMonsters: Monster Array;
@@ -63,9 +63,12 @@ MainGame: {
         i @monsters @ @nMonsters.pushBack
       ] when
     ] times
-    
+
     nMonsters @monsters set
     @camera.update
+    player.health 0.0r32 > not [
+      GameState.GameOver changeState
+    ] when
   ] func;
 
 };

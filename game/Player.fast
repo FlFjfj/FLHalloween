@@ -96,66 +96,67 @@ Player: [{
   update: [
     PlayerConst.DIR_NONE copy !moveDir
     state1 @state0 set
-    
-   
-      direction: (0.0r32 0.0r32) dynamic;
-      PlayerControls.keyRight system.isKeyDown [
-        1.0r32 0 @direction @ set
-        PlayerConst.DIR_RIGHT copy !moveDir
+
+
+    direction: (0.0r32 0.0r32) dynamic;
+    PlayerControls.keyRight system.isKeyDown [
+      1.0r32 0 @direction @ set
+      PlayerConst.DIR_RIGHT copy !moveDir
+    ] when
+
+    PlayerControls.keyLeft system.isKeyDown [
+      -1.0r32 0 @direction @ set
+      PlayerConst.DIR_LEFT copy !moveDir
+    ] when
+
+    PlayerControls.keyUp system.isKeyDown [
+      1.0r32 1 @direction @ set
+      PlayerConst.DIR_UP copy !moveDir
+    ] when
+
+    PlayerControls.keyDown system.isKeyDown [
+      -1.0r32 1 @direction @ set
+      PlayerConst.DIR_DOWN copy !moveDir
+    ] when
+
+    (0.0r32 0.0r32) direction = ~ [
+      newState1: direction normalize speed * FRAME_DURATION * state0 +;
+      newState1 toLegs isOnWall? ~ [
+        newState1 @state1 set
       ] when
+    ] when
 
-      PlayerControls.keyLeft system.isKeyDown [
-        -1.0r32 0 @direction @ set
-        PlayerConst.DIR_LEFT copy !moveDir
-      ] when
+    cameraCoords: (MainGame.camera.x copy  MainGame.camera.y copy);
+    playerToCamera: state1 cameraCoords -;
+    #playerToCamera len WORLD_HEIGHT 2.0r32 / > [
+    #  newTranslate: playerToCamera normalize WORLD_HEIGHT 2.0r32 / * state1 +;
+    #  newTranslate unwind @MainGame.@camera.setTranslate
+    #] when
 
-      PlayerControls.keyUp system.isKeyDown [
-        1.0r32 1 @direction @ set
-        PlayerConst.DIR_UP copy !moveDir
-      ] when
+    state0 @camera.@state0 set
+    state1 @camera.@state1 set
 
-      PlayerControls.keyDown system.isKeyDown [
-        -1.0r32 1 @direction @ set
-        PlayerConst.DIR_DOWN copy !moveDir
-      ] when
+    pumpkinTimer 1n32 + !pumpkinTimer
 
-      (0.0r32 0.0r32) direction = ~ [
-        newState1: direction normalize speed * FRAME_DURATION * state0 +;
-        newState1 toLegs isOnWall? ~ [
-          newState1 @state1 set
-        ] when
-      ] when
 
-      cameraCoords: (MainGame.camera.x copy  MainGame.camera.y copy);
-      playerToCamera: state1 cameraCoords -;
-      #playerToCamera len WORLD_HEIGHT 2.0r32 / > [
-      #  newTranslate: playerToCamera normalize WORLD_HEIGHT 2.0r32 / * state1 +;
-      #  newTranslate unwind @MainGame.@camera.setTranslate
-      #] when
-
-      state0 @camera.@state0 set
-      state1 @camera.@state1 set
-
-      pumpkinTimer 1n32 + !pumpkinTimer
-
-      PlayerControls.useFirst system.isKeyDown
+    PlayerControls.useFirst system.isKeyDown
+    [
+      pumpkinTimer PlayerConst.PUMPKIN_RELOAD >
       [
-        pumpkinTimer PlayerConst.PUMPKIN_RELOAD > player.health 0.0r32 > and
-        [
-          0n32 !pumpkinTimer
-          state1 direction createPumpkin @pumpkins.pushBack
-        ] when
+        0n32 !pumpkinTimer
+        state1 direction createPumpkin @pumpkins.pushBack
       ] when
+    ] when
 
-      lived: (0.0r32 0.0r32) (0.0r32 0.0r32) createPumpkin Array;
-      pumpkins fieldCount [
-        i @pumpkins.at pumpkin:; @pumpkin.update
-        [
-          pumpkin copy @lived.pushBack
-        ] when
-      ] times
+    lived: (0.0r32 0.0r32) (0.0r32 0.0r32) createPumpkin Array;
+    pumpkins fieldCount [
+      i @pumpkins.at pumpkin:; @pumpkin.update
+      [
+        pumpkin copy @lived.pushBack
+      ] when
+    ] times
 
-      lived copy !pumpkins
+    lived copy !pumpkins
   ] func;
 
   toLegs: [

@@ -101,6 +101,12 @@
     <Fast Include="game\LightSystem.fast">
       <Filter>game</Filter>
     </Fast>
+    <Fast Include="game\states\GameOver.fast">
+      <Filter>game\states</Filter>
+    </Fast>
+    <Fast Include="game\GUI.fast">
+      <Filter>game</Filter>
+    </Fast>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="sl">

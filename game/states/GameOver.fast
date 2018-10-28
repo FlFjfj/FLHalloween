@@ -1,4 +1,4 @@
-"mainmenu" module
+"gameover" module
 
 "control" useModule
 "string" useModule
@@ -9,7 +9,7 @@
 WORLD_WIDTH: 1424.0r32;
 WORLD_HEIGHT: 728.0r32;
 
-MainMenu: {
+GameOver: {
   batch: spriteBatch;
   camera: WORLD_WIDTH WORLD_HEIGHT orthographicCamera;
   shader: GLuint;
@@ -17,9 +17,9 @@ MainMenu: {
   modelLoc: GLint;
 
   init: [
-    "Menu init" print LF print
+    "Game over init" print LF print
     @batch.init
-    MainMenuStatic.shaderVert MainMenuStatic.shaderFrag ( ("u_modelTrans" @modelLoc) ("u_projTrans" @projLoc) ) loadShader !shader
+    GameOverStatic.shaderVert GameOverStatic.shaderFrag ( ("u_modelTrans" @modelLoc) ("u_projTrans" @projLoc) ) loadShader !shader
   ] func;
 
   draw: [
@@ -28,7 +28,7 @@ MainMenu: {
     GL_COLOR_BUFFER_BIT glClear
     shader glUseProgram
     camera.getCombined GL_FALSE Nat8 cast 1i32 projLoc glUniformMatrix4fv
-    assets.menuImage 0.0r32 0.0r32 1424.0r32 728.0r32 0.0r32 modelLoc batch.draw
+    assets.gameOverImage 0.0r32 0.0r32 1424.0r32 728.0r32 0.0r32 modelLoc batch.draw
     0n32 glUseProgram
   ] func;
 
@@ -41,11 +41,11 @@ MainMenu: {
   ] func;
 
   enterState: [
-      1.0r32 0.0r32 0.0r32 0.0r32 glClearColor
+    1.0r32 0.0r32 0.0r32 0.0r32 glClearColor
   ] func;
 };
 
-MainMenuStatic: {
+GameOverStatic: {
   shaderVert:
   "
 #version 330 core
@@ -80,3 +80,4 @@ MainMenuStatic: {
   }
   ";
 };
+

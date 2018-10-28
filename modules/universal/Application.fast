@@ -5,7 +5,10 @@
 "program" useModule
 
 "maingame" useModule
+"mainmenu" useModule
+"gameover" useModule
 "assets" useModule
+"opengl" useModule
 
 Application: [{
   systemRef: Natx;
@@ -15,6 +18,7 @@ Application: [{
   GameState: {
     MainGame: 0n8;
     MainMenu: 1n8;
+    GameOver: 2n8;
   };
 
   currentState: Nat8;
@@ -25,6 +29,7 @@ Application: [{
     (
       GameState.MainMenu [@MainMenu.enterState]
       GameState.MainGame [@MainGame.enterState]
+      GameState.GameOver [@GameOver.enterState]
       ["invalid state" failProc]
     ) case
   ] func;
@@ -40,7 +45,8 @@ Application: [{
     (
       GameState.MainMenu [@MainMenu.draw]
       GameState.MainGame [@MainGame.draw]
-      ["invalid state" failProc]
+      GameState.GameOver [@GameOver.draw]
+      []
     ) case
   ] func;
 
@@ -50,7 +56,8 @@ Application: [{
     (
       GameState.MainMenu [@MainMenu.update]
       GameState.MainGame [@MainGame.update]
-      ["invalid state" failProc]
+      GameState.GameOver [@GameOver.update]
+      []
     ) case
   ] func;
 
@@ -61,6 +68,7 @@ Application: [{
     initAssets
     @MainGame.init
     @MainMenu.init
+    @GameOver.init
     GameState.MainMenu changeState
   ] func;
 
