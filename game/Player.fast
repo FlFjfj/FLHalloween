@@ -129,7 +129,7 @@ Player: [{
       pumpkinTimer PlayerConst.PUMPKIN_RELOAD >
       [
         0n32 !pumpkinTimer
-        state1 direction normalize createPumpkin @pumpkins.pushBack
+        state1 direction createPumpkin @pumpkins.pushBack
       ] when
     ] when
 
