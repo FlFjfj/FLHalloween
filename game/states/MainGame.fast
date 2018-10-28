@@ -32,7 +32,6 @@ MainGame: {
     @batch.init
     @map.init
     @player.init
-    Monster.init
     @gui.init
   ] func;
 
@@ -53,9 +52,9 @@ MainGame: {
 
   update: [
     time: system.getTime;
-    time lastMonsterTime - 5.0r32 > [
+    time lastMonsterTime - 5.0r32 > monsters fieldCount 7 < and [
       time @lastMonsterTime set
-      Monster @monsters.pushBack
+      Monster m:; @m.init m copy @monsters.pushBack
     ] when
 
     @map.update

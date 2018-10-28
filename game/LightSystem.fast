@@ -13,24 +13,26 @@ LightSystem: [{
   used:     (MAXIMUM [Real32] times);
 
   reserveLight: [
-    isFound: FALSE;
+    result: -1;
     
     MAXIMUM [
       i used @ 0.0r32 =
       [
-        i copy
+        i copy !result
         1.0r32 i @used @ set
-        TRUE !isFound
         MAXIMUM copy !i
       ] when
     ] times
 
-    isFound [] [-1] if
+    result -1 = not 
+    ["Reserved " print result print LF print] when
+    result
   ] func;
 
   freeLight: [
     i:;
     0.0r32 i @used @ set
+    "Freed " print i print LF print
   ] func;
 
   getPosition: [position storageAddress Real32 Cref cast] func;

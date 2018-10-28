@@ -16,6 +16,8 @@ Monster: [{
   moveDir: MonsterConst.DIR_NONE copy;
   speed: 75.0r32;
 
+  lamp: 0i32;
+
   init: [
     MonsterConst.initialized not [
       (
@@ -28,20 +30,36 @@ Monster: [{
       MonsterAnimatedShader.shaderVert MonsterAnimatedShader.shaderFrag
       (
         ("u_modelTrans" @MonsterConst.@modelLoc)
-        ("u_projTrans" @MonsterConst.@projLoc)
-        ("u_Time" @MonsterConst.@timeLoc)
-        ("u_Health" @MonsterConst.@healthLoc)
+        ("u_projTrans"  @MonsterConst.@projLoc)
+        ("u_Time"       @MonsterConst.@timeLoc)
+        ("u_position"  @MonsterConst.@lightPosLoc)
+        ("u_radius"    @MonsterConst.@lightRadLoc)
+        ("u_color"     @MonsterConst.@lightColorLoc)
+        ("u_used"      @MonsterConst.@lightUsedLoc)
       ) loadShader @MonsterConst.@shader set
       TRUE @MonsterConst.@initialized set
     ] when
+
+    @lightSys.reserveLight !lamp
+    lamp -1i32 =
+    [ "Light unavailable" print LF print ]
+    [
+      (0.5r32 0.0r32 0.5r32) lamp @lightSys.@color @ set
+      200.0r32 lamp @lightSys.@radius @ set
+    ] if
+
   ] func;
 
   draw: [
     MonsterConst.shader glUseProgram
     coords: state0 state1 state0 - frameTime * +;
     getTime MonsterConst.timeLoc glUniform1f
-    health MonsterConst.healthLoc glUniform1f
     camera.getCombined GL_TRUE Nat8 cast 1i32 MonsterConst.projLoc glUniformMatrix4fv
+    lightSys.getColor    lightSys.MAXIMUM MonsterConst.lightColorLoc glUniform3fv
+    lightSys.getPosition lightSys.MAXIMUM MonsterConst.lightPosLoc   glUniform2fv
+    lightSys.getRadius   lightSys.MAXIMUM MonsterConst.lightRadLoc   glUniform1fv
+    lightSys.getUsed     lightSys.MAXIMUM MonsterConst.lightUsedLoc  glUniform1fv
+
     moveDir MonsterConst.texture @
     coords unwind
     MonsterConst.WIDTH
@@ -49,6 +67,12 @@ Monster: [{
     0.0r32
     MonsterConst.modelLoc batch.draw
     0n32 glUseProgram
+
+    lamp -1 = not
+    [
+      coords lamp @lightSys.@position @ set
+      (1.0r32 health - 0.0r32 health copy) lamp @lightSys.@color @ set
+    ] when
   ] func;
 
   update: [
@@ -87,6 +111,9 @@ Monster: [{
       player.exp 1.0r32 > [
         1.0r32  @player.!exp
       ] when
+
+      lamp -1 = not
+      [lamp @lightSys.freeLight] when
       "monster dead, player total exp: " print player.exp print LF print
     ] when
 
@@ -127,7 +154,10 @@ MonsterConst: {
   timeLoc: GLint;
   projLoc: GLint;
   modelLoc: GLint;
-  healthLoc: GLint;
+  lightUsedLoc: GLint;
+  lightPosLoc: GLint;
+  lightRadLoc: GLint;
+  lightColorLoc: GLint;
   WIDTH: 100.0r32;
   HEIGHT: 150.0r32;
 
@@ -156,12 +186,15 @@ MonsterAnimatedShader: {
   uniform float u_Time;
   
   out vec2 vCoord;
+  out vec2 worldCoord;
   flat out float vFrame;
   
   void main() {
     vFrame = int((u_Time - int(u_Time)) * FRAME_COUNT);
     vCoord = aCoord;
-    gl_Position = u_projTrans * u_modelTrans * vec4(aPosition, 1.0);
+    vec4 position = u_modelTrans * vec4(aPosition, 1.0);
+    worldCoord = position.xy;
+    gl_Position = u_projTrans * position;
   }
   ";
 
@@ -174,16 +207,28 @@ MonsterAnimatedShader: {
   precision mediump float;
   
   in vec2 vCoord;
+  in vec2 worldCoord;
   flat in float vFrame;
   
   out vec4 color;
   
   uniform sampler2D u_Texture;
-  uniform float u_Health;
+  uniform vec2  u_position[32];
+  uniform vec3  u_color[32];
+  uniform float u_radius[32];
+  uniform float u_used[32];
+  
   void main() {
+    vec3 lightColor = vec3(0.0);
+    for(int i = 0; i < 32; i++) {
+      if(u_used[i] == 1.0){
+        float len = clamp(1.0 - length(worldCoord - u_position[i]) / u_radius[i], 0.0, 1.0);
+        lightColor = lightColor + u_color[i] * len * len;
+      }
+    }
+  
     vec4 texColor = texture(u_Texture, vec2(vCoord.x, (vCoord.y + vFrame) / FRAME_COUNT));
-    color = mix(texColor, vec4(1.0,0.0,0.0,texColor.w),1.0 - u_Health);
+    color = vec4(texColor.xyz * lightColor, texColor.a);
   }
   ";
-
 };
