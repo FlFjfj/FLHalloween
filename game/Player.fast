@@ -39,7 +39,7 @@ Player: [{
   timeLoc: GLint;
   projLoc: GLint;
   modelLoc: GLint;
-
+  healthLoc: GLint;
   speed: 400.0r32;
 
   pumpkinTimer: 0n32;
@@ -58,6 +58,7 @@ Player: [{
       ("u_modelTrans" @modelLoc)
       ("u_projTrans" @projLoc)
       ("u_Time" @timeLoc)
+      ("u_Health" @healthLoc)
     ) loadShader !shader
 
     LEFT @PlayerControls.!keyLeft
@@ -74,6 +75,7 @@ Player: [{
     shader glUseProgram
     coords: state0 state1 state0 - frameTime * +;
     getTime timeLoc glUniform1f
+    health healthLoc glUniform1f
     camera.getCombined GL_TRUE Nat8 cast 1i32 projLoc glUniformMatrix4fv
     moveDir texture @ coords unwind PlayerConst.WIDTH PlayerConst.HEIGHT 0.0r32 modelLoc batch.draw
     0n32 glUseProgram
@@ -84,64 +86,66 @@ Player: [{
   update: [
     PlayerConst.DIR_NONE copy !moveDir
     state1 @state0 set
-    direction: (0.0r32 0.0r32) dynamic;
-    PlayerControls.keyRight system.isKeyDown [
-      1.0r32 0 @direction @ set
-      PlayerConst.DIR_RIGHT copy !moveDir
-    ] when
-
-    PlayerControls.keyLeft system.isKeyDown [
-      -1.0r32 0 @direction @ set
-      PlayerConst.DIR_LEFT copy !moveDir
-    ] when
-
-    PlayerControls.keyUp system.isKeyDown [
-      1.0r32 1 @direction @ set
-      PlayerConst.DIR_UP copy !moveDir
-    ] when
-
-    PlayerControls.keyDown system.isKeyDown [
-      -1.0r32 1 @direction @ set
-      PlayerConst.DIR_DOWN copy !moveDir
-    ] when
-
-    (0.0r32 0.0r32) direction = ~ [
-      newState1: direction normalize speed * FRAME_DURATION * state0 +;
-      newState1 toLegs isOnWall? ~ [
-        newState1 @state1 set
+    
+   
+      direction: (0.0r32 0.0r32) dynamic;
+      PlayerControls.keyRight system.isKeyDown [
+        1.0r32 0 @direction @ set
+        PlayerConst.DIR_RIGHT copy !moveDir
       ] when
-    ] when
 
-    cameraCoords: (MainGame.camera.x copy  MainGame.camera.y copy);
-    playerToCamera: state1 cameraCoords -;
-    #playerToCamera len WORLD_HEIGHT 2.0r32 / > [
-    #  newTranslate: playerToCamera normalize WORLD_HEIGHT 2.0r32 / * state1 +;
-    #  newTranslate unwind @MainGame.@camera.setTranslate
-    #] when
+      PlayerControls.keyLeft system.isKeyDown [
+        -1.0r32 0 @direction @ set
+        PlayerConst.DIR_LEFT copy !moveDir
+      ] when
 
-    state0 @camera.@state0 set
-    state1 @camera.@state1 set
+      PlayerControls.keyUp system.isKeyDown [
+        1.0r32 1 @direction @ set
+        PlayerConst.DIR_UP copy !moveDir
+      ] when
 
-    pumpkinTimer 1n32 + !pumpkinTimer
+      PlayerControls.keyDown system.isKeyDown [
+        -1.0r32 1 @direction @ set
+        PlayerConst.DIR_DOWN copy !moveDir
+      ] when
 
-    PlayerControls.useFirst system.isKeyDown
-    [
-      pumpkinTimer PlayerConst.PUMPKIN_RELOAD >
+      (0.0r32 0.0r32) direction = ~ [
+        newState1: direction normalize speed * FRAME_DURATION * state0 +;
+        newState1 toLegs isOnWall? ~ [
+          newState1 @state1 set
+        ] when
+      ] when
+
+      cameraCoords: (MainGame.camera.x copy  MainGame.camera.y copy);
+      playerToCamera: state1 cameraCoords -;
+      #playerToCamera len WORLD_HEIGHT 2.0r32 / > [
+      #  newTranslate: playerToCamera normalize WORLD_HEIGHT 2.0r32 / * state1 +;
+      #  newTranslate unwind @MainGame.@camera.setTranslate
+      #] when
+
+      state0 @camera.@state0 set
+      state1 @camera.@state1 set
+
+      pumpkinTimer 1n32 + !pumpkinTimer
+
+      PlayerControls.useFirst system.isKeyDown
       [
-        0n32 !pumpkinTimer
-        state1 direction createPumpkin @pumpkins.pushBack
+        pumpkinTimer PlayerConst.PUMPKIN_RELOAD > player.health 0.0r32 > and
+        [
+          0n32 !pumpkinTimer
+          state1 direction createPumpkin @pumpkins.pushBack
+        ] when
       ] when
-    ] when
 
-    lived: (0.0r32 0.0r32) (0.0r32 0.0r32) createPumpkin Array;
-    pumpkins fieldCount [
-      i @pumpkins.at pumpkin:; @pumpkin.update
-      [
-        pumpkin copy @lived.pushBack
-      ] when
-    ] times
+      lived: (0.0r32 0.0r32) (0.0r32 0.0r32) createPumpkin Array;
+      pumpkins fieldCount [
+        i @pumpkins.at pumpkin:; @pumpkin.update
+        [
+          pumpkin copy @lived.pushBack
+        ] when
+      ] times
 
-    lived copy !pumpkins
+      lived copy !pumpkins
   ] func;
 
   toLegs: [
@@ -208,10 +212,13 @@ PlayerAnimatedShader: {
   
   out vec4 color;
   
+  uniform float u_Health;
   uniform sampler2D u_Texture;
   
   void main() {
-    color = texture(u_Texture, vec2(vCoord.x, (vCoord.y + vFrame) / FRAME_COUNT));
+     vec4 texColor = texture(u_Texture, vec2(vCoord.x, (vCoord.y + vFrame) / FRAME_COUNT));
+   // color = mix(texColor, vec4(1.0,0.0,0.0,texColor.w),1.0 - u_Health);
+    color = texColor;
   }
   ";
 

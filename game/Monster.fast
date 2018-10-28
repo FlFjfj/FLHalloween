@@ -14,7 +14,7 @@ Monster: [{
   health: 1.0r32;
   moveDir: MonsterConst.DIR_NONE copy;
   speed: 200.0r32;
-
+   
   init: [
     MonsterConst.initialized not [
       (
@@ -29,6 +29,7 @@ Monster: [{
         ("u_modelTrans" @MonsterConst.@modelLoc)
         ("u_projTrans" @MonsterConst.@projLoc)
         ("u_Time" @MonsterConst.@timeLoc)
+        ("u_Health" @MonsterConst.@healthLoc)
       ) loadShader @MonsterConst.@shader set
       TRUE @MonsterConst.@initialized set
     ] when
@@ -38,6 +39,7 @@ Monster: [{
     MonsterConst.shader glUseProgram
     coords: state0 state1 state0 - frameTime * +;
     getTime MonsterConst.timeLoc glUniform1f
+    health MonsterConst.healthLoc glUniform1f
     camera.getCombined GL_TRUE Nat8 cast 1i32 MonsterConst.projLoc glUniformMatrix4fv
     moveDir MonsterConst.texture @
     coords unwind
@@ -69,12 +71,14 @@ Monster: [{
       MonsterConst.DIR_DOWN copy !moveDir
     ] when
 
-    (0.0r32 0.0r32) direction = ~ [
+     direction len PlayerConst.WIDTH 2.0r32 / > [
       newState1: direction normalize speed * FRAME_DURATION * state0 +;
       newState1 toLegs isOnWall? ~ [
         newState1 @state1 set
       ] when
-    ] when
+    ] [
+      player.health FRAME_DURATION - @player.@health set
+    ] if
     
     health 0.0r32 >
   ] func;
@@ -111,6 +115,7 @@ MonsterConst: {
   timeLoc: GLint;
   projLoc: GLint;
   modelLoc: GLint;
+  healthLoc: GLint;
   WIDTH: 100.0r32;
   HEIGHT: 150.0r32;
 
@@ -162,9 +167,10 @@ MonsterAnimatedShader: {
   out vec4 color;
   
   uniform sampler2D u_Texture;
-  
+  uniform float u_Health;
   void main() {
-    color = texture(u_Texture, vec2(vCoord.x, (vCoord.y + vFrame) / FRAME_COUNT));
+    vec4 texColor = texture(u_Texture, vec2(vCoord.x, (vCoord.y + vFrame) / FRAME_COUNT));
+    color = mix(texColor, vec4(1.0,0.0,0.0,texColor.w),1.0 - u_Health);
   }
   ";
 
