@@ -16,22 +16,54 @@ WORLD_HEIGHT: 728.0r32;
 
 MainGame: {
 
+  fbo: Nat32;
+  fboTex: Nat32;
+  halfShader: Nat32;
+  halfModelTrans: Int32;
+  halfProjTrans: Int32;
+
+  playerOneCamera: WORLD_WIDTH WORLD_HEIGHT orthographicCamera;
+  playerTwoCamera: WORLD_WIDTH WORLD_HEIGHT orthographicCamera;
+
+  playerOne: Player;
+  playerTwo: Player;
+
   map: WorldMap;
   batch: spriteBatch;
-  camera: WORLD_WIDTH WORLD_HEIGHT orthographicCamera;
   startTime: Real32;
   lastMonsterTime: Real32;
-  player: Player;
   monsters: Monster Array;
   gui: GUI;
-  
+
   lightSys: LightSystem;
-  
+
   init: [
+    WORLD_WIDTH Int32 cast WORLD_HEIGHT Int32 cast generateFramebuffer !fboTex !fbo
+    PlayerHalfShader.shaderVert PlayerHalfShader.shaderFrag
+    (
+      ("u_modelTrans" @halfModelTrans)
+      ("u_projTrans" @halfProjTrans)
+    ) loadShader !halfShader
+
     system.getTime @lastMonsterTime set
     @batch.init
     @map.init
-    @player.init
+
+    {
+      keyLeft: KEY_A;
+      keyRight: KEY_D;
+      keyUp: KEY_W;
+      keyDown: KEY_S;
+      useFirst: KEY_F;
+    } @playerOne.init
+
+    {
+      keyLeft: LEFT;
+      keyRight: RIGHT;
+      keyUp: UP;
+      keyDown: DOWN;
+      useFirst: KEY_M;
+    } @playerTwo.init
     @gui.init
   ] func;
 
@@ -41,13 +73,33 @@ MainGame: {
 
   draw: [
     GL_COLOR_BUFFER_BIT glClear
+
+
+    playerOne playerTwo @playerOneCamera drawPlayer
+    halfShader glUseProgram
+    fboTex -0.5r32 0.0r32 1.0r32 2.0r32 0.0r32 halfModelTrans batch.draw
+    0n32 glUseProgram
+    playerTwo playerOne @playerTwoCamera drawPlayer
+    halfShader glUseProgram
+    fboTex  0.5r32 0.0r32 1.0r32 2.0r32 0.0r32 halfModelTrans batch.draw
+    0n32 glUseProgram
+  ] func;
+
+  drawPlayer: [
+    player:playerTwo:camera:;;;
+
+    fbo GL_FRAMEBUFFER glBindFramebuffer
+
+    GL_COLOR_BUFFER_BIT glClear
     @camera.beforeDraw
     map.drawFloor
     player.draw
+    playerTwo.draw
     monsters fieldCount [i monsters @ .draw] times
     map.drawObj
-    sys: lightSys;
     gui.draw
+
+    0n32 GL_FRAMEBUFFER glBindFramebuffer
   ] func;
 
   update: [
@@ -58,7 +110,10 @@ MainGame: {
     ] when
 
     @map.update
-    @player.update
+    @playerOneCamera
+    @playerOne.update
+    @playerTwoCamera
+    @playerTwo.update
     nMonsters: Monster Array;
     monsters fieldCount [
       i @monsters @ .update [
@@ -67,10 +122,45 @@ MainGame: {
     ] times
 
     nMonsters @monsters set
-    @camera.update
-    player.health 0.0r32 > not [
-      GameState.GameOver changeState
-    ] when
+    @playerOneCamera.update
+    @playerTwoCamera.update
+    #player.health 0.0r32 > not [
+    #  GameState.GameOver changeState
+    #] when
   ] func;
 
+};
+
+PlayerHalfShader: {
+  shaderVert:
+  "
+#version 330 core
+
+  layout (location = 0) in vec3 aPosition;
+  layout (location = 1) in vec2 aCoord;
+
+  uniform mat4 u_modelTrans;
+  
+  out vec2 vCoord;
+  
+  void main() {
+    vCoord = vec2(aCoord.x, 1.0 - aCoord.y);
+    gl_Position = u_modelTrans *  vec4(aPosition, 1.0);
+  }
+  ";
+
+  shaderFrag:
+  "
+  #version 330 core
+  precision mediump float;
+  
+  in vec2 vCoord;
+  out vec4 color;
+  
+  uniform sampler2D u_Texture;
+
+  void main() {
+    color = texture(u_Texture, vCoord);
+  }
+  ";
 };

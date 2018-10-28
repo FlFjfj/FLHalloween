@@ -14,7 +14,7 @@ Monster: [{
   state1: state0 copy;
   health: 1.0r32;
   moveDir: MonsterConst.DIR_NONE copy;
-  speed: 150.0r32;
+  speed: 75.0r32;
 
   lamp: 0i32;
 
@@ -76,45 +76,45 @@ Monster: [{
   ] func;
 
   update: [
-    MonsterConst.DIR_NONE copy !moveDir
-    state1 @state0 set
-    direction: player.state1 state1 -;
-
-    0 direction @ 1.0r32 > [
-      MonsterConst.DIR_RIGHT copy !moveDir
-    ] when
-
-    0 direction @ -1.0r32 < [
-      MonsterConst.DIR_LEFT copy !moveDir
-    ] when
-
-    1 direction @ 1.0r32 > [
-      MonsterConst.DIR_UP copy !moveDir
-    ] when
-
-    1 direction @ -1.0r32 < [
-      MonsterConst.DIR_DOWN copy !moveDir
-    ] when
-
-    direction len PlayerConst.WIDTH 2.0r32 / > [
-      newState1: direction normalize speed * FRAME_DURATION * state0 +;
-      newState1 toLegs isOnWall? ~ [
-        newState1 @state1 set
-      ] when
-    ] [
-      player.health FRAME_DURATION MonsterConst.SECONDS_TO_KILL / - @player.!health
-    ] if
+    #MonsterConst.DIR_NONE copy !moveDir
+    #state1 @state0 set
+    #direction: player.state1 state1 -;
+    #
+    #0 direction @ 1.0r32 > [
+    #  MonsterConst.DIR_RIGHT copy !moveDir
+    #] when
+    #
+    #0 direction @ -1.0r32 < [
+    #  MonsterConst.DIR_LEFT copy !moveDir
+    #] when
+    #
+    #1 direction @ 1.0r32 > [
+    #  MonsterConst.DIR_UP copy !moveDir
+    #] when
+    #
+    #1 direction @ -1.0r32 < [
+    #  MonsterConst.DIR_DOWN copy !moveDir
+    #] when
+    #
+    #direction len PlayerConst.WIDTH 2.0r32 / > [
+    #  newState1: direction normalize speed * FRAME_DURATION * state0 +;
+    #  newState1 toLegs isOnWall? ~ [
+    #    newState1 @state1 set
+    #  ] when
+    #] [
+    #  player.health FRAME_DURATION MonsterConst.SECONDS_TO_KILL / - @player.!health
+    #] if
 
     dies: health 0.0r32 <;
     dies [
-      player.exp MonsterConst.EXP_FOR_KILL + @player.!exp
-      player.exp 1.0r32 > [
-        1.0r32  @player.!exp
-      ] when
+      #player.exp MonsterConst.EXP_FOR_KILL + @player.!exp
+      #player.exp 1.0r32 > [
+      #  1.0r32  @player.!exp
+      #] when
 
       lamp -1 = not
       [lamp @lightSys.freeLight] when
-      "monster dead, player total exp: " print player.exp print LF print
+      #"monster dead, player total exp: " print player.exp print LF print
     ] when
 
     dies not
