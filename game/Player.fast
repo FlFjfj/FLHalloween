@@ -67,7 +67,7 @@ Player: [{
     KEY_M @PlayerControls.!useFirst
 
     SubResourceInit
-    
+
   ] func;
 
   draw: [
@@ -211,12 +211,18 @@ PlayerAnimatedShader: {
 
 SubResourceInit: [
   PumpkinStaticShader.shaderVert PumpkinStaticShader.shaderFrag
-    (
-      ("u_modelTrans" @PumpkinVars.@modelLoc)
-      ("u_projTrans" @PumpkinVars.@projLoc)
-      ("u_Time" @PumpkinVars.@timeLoc)
-    ) loadShader @PumpkinVars.!shader
+  (
+    ("u_modelTrans" @PumpkinVars.@modelLoc)
+    ("u_projTrans" @PumpkinVars.@projLoc)
+    ("u_Time" @PumpkinVars.@timeLoc)
+  ) loadShader @PumpkinVars.!shader
 
+  (
+    assets.pumpkinLeft copy
+    assets.pumpkinRight copy
+    assets.pumpkinUp copy
+    assets.pumpkinDown copy
+  ) @PumpkinVars.!textures
 ] func;
 
 createPumpkin: [

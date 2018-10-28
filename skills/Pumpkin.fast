@@ -1,0 +1,97 @@
+"pumpkin" module
+
+"control" useModule
+"algebra" useModule
+"opengl" useModule
+"glutils" useModule
+"glwrapper" useModule
+
+PumpkinVars: {
+  PUMPKIN_WIDTH: 50.0r32;
+  PUMPKIN_HEIGHT: 50.0r32;
+  
+  shader: GLuint;
+  timeLoc: GLint;
+  projLoc: GLint;
+  modelLoc: GLint;
+
+  textures: (4 [GLuint] times);
+};
+
+Pumpkin: [{
+  position:direction: copy; copy;
+  new_position: position copy;
+  texture: 0i32;
+
+  0 direction @ 0.0r32 <
+  [ 0i32 !texture ] when
+
+  0 direction @ 0.0r32 >
+  [ 1i32 !texture ] when
+
+  1 direction @ 0.0r32 <
+  [ 2i32 !texture ] when
+
+  1 direction @ 0.0r32 >
+  [ 3i32 !texture ] when
+
+  draw: [
+    PumpkinVars.shader glUseProgram
+    coords: position new_position position - frameTime * +;
+    getTime PumpkinVars.timeLoc glUniform1f
+    camera.getCombined GL_TRUE Nat8 cast 1i32 PumpkinVars.projLoc glUniformMatrix4fv
+    texture PumpkinVars.textures @ coords unwind PumpkinVars.PUMPKIN_WIDTH PumpkinVars.PUMPKIN_HEIGHT 0.0r32 PumpkinVars.modelLoc batch.draw
+    0n32 glUseProgram
+  ] func;
+
+  update: [
+
+  ] func;
+
+}] func;
+
+PumpkinStaticShader: {
+  shaderVert:
+  "
+  #version 330 core
+  
+  #define FRAME_COUNT 7.0
+  #define FRAME_TIME 0.15
+  
+  layout (location = 0) in vec3 aPosition;
+  layout (location = 1) in vec2 aCoord;
+
+  uniform mat4 u_projTrans;
+  uniform mat4 u_modelTrans;
+  uniform float u_Time;
+  
+  out vec2 vCoord;
+  flat out float vFrame;
+  
+  void main() {
+    vFrame = int((u_Time - int(u_Time)) * FRAME_COUNT);
+    vCoord = aCoord;
+    gl_Position = u_projTrans * u_modelTrans * vec4(aPosition, 1.0);
+  }
+  ";
+
+  shaderFrag:
+  "
+  #version 330 core
+
+  #define FRAME_COUNT 7.0 
+  
+  precision mediump float;
+  
+  in vec2 vCoord;
+  flat in float vFrame;
+  
+  out vec4 color;
+  
+  uniform sampler2D u_Texture;
+  
+  void main() {
+    color = texture(u_Texture, vec2((vCoord.x + vFrame) / FRAME_COUNT, vCoord.y));
+  }
+  ";
+};

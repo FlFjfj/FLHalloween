@@ -17,6 +17,12 @@ initAssets: [
   "assets/playerSideLeft.png" loadTexture @assets.!playerSideLeft
   "assets/playerSideRight.png" loadTexture @assets.!playerSideRight
   "assets/playerStand.png" loadTexture @assets.!playerStand
+
+  "assets/pumpkinBack.png" loadTexture @assets.!pumpkinUp
+  "assets/pumpkinFront.png" loadTexture @assets.!pumpkinDown
+  "assets/pumpkinSideLeft.png" loadTexture @assets.!pumpkinLeft
+  "assets/pumpkinSideRight.png" loadTexture @assets.!pumpkinRight
+
 ] func;
 
 assets: {
@@ -29,6 +35,11 @@ assets: {
   playerFront: Nat32;
   playerSideLeft: Nat32;
   playerSideRight: Nat32;
+
+  pumpkinLeft: Nat32;
+  pumpkinRight: Nat32;
+  pumpkinUp: Nat32;
+  pumpkinDown: Nat32;
 
   menuImage: Nat32;
 };
