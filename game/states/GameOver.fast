@@ -15,7 +15,7 @@ GameOver: {
   shader: GLuint;
   projLoc: GLint;
   modelLoc: GLint;
-
+  winnerPlayer: Int32;
   init: [
     "Game over init" print LF print
     @batch.init
@@ -28,7 +28,7 @@ GameOver: {
     GL_COLOR_BUFFER_BIT glClear
     shader glUseProgram
     camera.getCombined GL_FALSE Nat8 cast 1i32 projLoc glUniformMatrix4fv
-    assets.gameOverImage 0.0r32 0.0r32 1424.0r32 728.0r32 0.0r32 modelLoc batch.draw
+    winnerPlayer 1 = [assets.playerOneWin] [assets.playerTwoWin] if 0.0r32 0.0r32 1424.0r32 728.0r32 0.0r32 modelLoc batch.draw
     0n32 glUseProgram
   ] func;
 
@@ -41,6 +41,7 @@ GameOver: {
   ] func;
 
   enterState: [
+    winner @winnerPlayer set
     1.0r32 0.0r32 0.0r32 0.0r32 glClearColor
   ] func;
 };

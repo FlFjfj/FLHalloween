@@ -124,9 +124,10 @@ MainGame: {
     nMonsters @monsters set
     @playerOneCamera.update
     @playerTwoCamera.update
-    #player.health 0.0r32 > not [
-    #  GameState.GameOver changeState
-    #] when
+    playerOne.health 0.0r32 > not playerTwo.health 0.0r32 > not or [
+      playerOne.health 0.0r32 > [1] [2] if @winner set
+      GameState.GameOver changeState
+    ] when
   ] func;
 
 };

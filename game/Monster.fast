@@ -76,34 +76,47 @@ Monster: [{
   ] func;
 
   update: [
-    #MonsterConst.DIR_NONE copy !moveDir
-    #state1 @state0 set
-    #direction: player.state1 state1 -;
-    #
-    #0 direction @ 1.0r32 > [
-    #  MonsterConst.DIR_RIGHT copy !moveDir
-    #] when
-    #
-    #0 direction @ -1.0r32 < [
-    #  MonsterConst.DIR_LEFT copy !moveDir
-    #] when
-    #
-    #1 direction @ 1.0r32 > [
-    #  MonsterConst.DIR_UP copy !moveDir
-    #] when
-    #
-    #1 direction @ -1.0r32 < [
-    #  MonsterConst.DIR_DOWN copy !moveDir
-    #] when
-    #
-    #direction len PlayerConst.WIDTH 2.0r32 / > [
-    #  newState1: direction normalize speed * FRAME_DURATION * state0 +;
-    #  newState1 toLegs isOnWall? ~ [
-    #    newState1 @state1 set
-    #  ] when
-    #] [
-    #  player.health FRAME_DURATION MonsterConst.SECONDS_TO_KILL / - @player.!health
-    #] if
+    MonsterConst.DIR_NONE copy !moveDir
+    state1 @state0 set
+    directionOne: playerOne.state1 state1 -;
+    directionTwo: playerTwo.state1 state1 -;
+    directionOne len PlayerConst.WIDTH 2.0r32 / < [
+      playerOne.health FRAME_DURATION MonsterConst.SECONDS_TO_KILL / - @playerOne.!health
+    ] when
+
+    directionTwo len PlayerConst.WIDTH 2.0r32 / < [
+      playerTwo.health FRAME_DURATION MonsterConst.SECONDS_TO_KILL / - @playerTwo.!health
+    ] when
+
+    newState1: Real32 2 Vector;
+    direction: Real32 2 Vector;
+    directionTwo len directionOne len > [
+      directionOne normalize speed * FRAME_DURATION * state0 + !newState1
+      directionOne @direction set
+    ] [
+      directionTwo normalize speed * FRAME_DURATION * state0 + !newState1
+      directionTwo @direction set
+    ] if
+
+    newState1 toLegs isOnWall? ~ [
+      newState1 @state1 set
+    ] when
+
+    0 direction @ 1.0r32 > [
+      MonsterConst.DIR_RIGHT copy !moveDir
+    ] when
+
+    0 direction @ -1.0r32 < [
+      MonsterConst.DIR_LEFT copy !moveDir
+    ] when
+
+    1 direction @ 1.0r32 > [
+      MonsterConst.DIR_UP copy !moveDir
+    ] when
+
+    1 direction @ -1.0r32 < [
+      MonsterConst.DIR_DOWN copy !moveDir
+    ] when
 
     dies: health 0.0r32 <;
     dies [

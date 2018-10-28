@@ -12,6 +12,7 @@
 "glutils" useModule
 
 Application: [{
+  winner: Int32;
   systemRef: Natx;
   setSystem: [storageAddress @systemRef set] func;
   getSystem: [systemRef System Ref cast] func;

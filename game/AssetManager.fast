@@ -36,6 +36,8 @@ initAssets: [
   "assets/pumpkinVert.png" loadTexture @assets.!pumpkinVert
   "assets/pumpkinHoriz.png" loadTexture @assets.!pumpkinHoriz
   "assets/gameOverImage.png" loadTexture @assets.!gameOverImage
+  "assets/playerOneWin.png" loadTexture @assets.!playerOneWin
+  "assets/playerTwoWin.png" loadTexture @assets.!playerTwoWin
 ] func;
 
 assets: {
@@ -67,4 +69,6 @@ assets: {
 
   gameOverImage: Nat32;
   menuImage: Nat32;
+  playerOneWin: Nat32;
+  playerTwoWin: Nat32;
 };
