@@ -12,26 +12,8 @@ GUI: [{
   projLoc: GLint;
   modelLoc: GLint;
   healthLoc: GLint;
-  speed: 400.0r32;
-  fboHP: GLuint;
-  fbTexHP: GLuint;
-  fboEXP: GLuint;
-  fbTexEXP: GLuint;
+  
   init: [
-    300 30 generateFramebuffer !fbTexHP !fboHP  
-    300 30 generateFramebuffer !fbTexEXP !fboEXP 
-    
-    fboHP GL_FRAMEBUFFER glBindFramebuffer
-    1.0r32 0.0r32 0.0r32 1.0r32 glClearColor
-    GL_COLOR_BUFFER_BIT glClear
-    
-    fboEXP GL_FRAMEBUFFER glBindFramebuffer
-    1.0r32 0.0r32 1.0r32 0.0r32 glClearColor
-    GL_COLOR_BUFFER_BIT glClear
-    
-    0n32 GL_FRAMEBUFFER glBindFramebuffer
-    0.0r32 0.0r32 0.0r32 0.0r32 glClearColor
-    
     hpShaderSrc.shaderVert hpShaderSrc.shaderFrag ( ("u_modelTrans" @modelLoc) ("u_projTrans" @projLoc) ) loadShader !shader
   ] func;
   
@@ -39,8 +21,7 @@ GUI: [{
     shader glUseProgram
     camera.getCombined GL_TRUE Nat8 cast 1i32 projLoc glUniformMatrix4fv
     center: player.state1 player.state0 - frameTime * player.state0 +;
-    fbTexHP center (400.0r32 300.0r32) - unwind 300.0r32 player.health * 30.0r32 0.0r32 modelLoc batch.draw
-    fbTexEXP center (400.0r32 260.0r32) - unwind 300.0r32 player.exp * 30.0r32 0.0r32 modelLoc batch.draw
+    assets.hpBar center (400.0r32 300.0r32) - unwind 150.0r32 player.health * 150.0r32 player.health * 0.0r32 modelLoc batch.draw
     0n32 glUseProgram
   ] func;
 
@@ -55,21 +36,15 @@ hpShaderSrc: {
   "
   #version 330 core
   
-  #define FRAME_COUNT 4.0
-  #define FRAME_TIME 0.01
-  
   layout (location = 0) in vec3 aPosition;
   layout (location = 1) in vec2 aCoord;
 
   uniform mat4 u_projTrans;
   uniform mat4 u_modelTrans;
-  uniform float u_Time;
   
   out vec2 vCoord;
-  flat out float vFrame;
   
   void main() {
-    vFrame = int((u_Time - int(u_Time)) * FRAME_COUNT);
     vCoord = aCoord;
     gl_Position = u_projTrans * u_modelTrans * vec4(aPosition, 1.0);
   }
@@ -78,90 +53,18 @@ hpShaderSrc: {
   shaderFrag:
   "
   #version 330 core
-
-  #define FRAME_COUNT 4.0 
   
   precision mediump float;
   
   in vec2 vCoord;
-  flat in float vFrame;
-  
   out vec4 color;
-  
-  uniform float u_Health;
+
   uniform sampler2D u_Texture;
   
   void main() {
-     vec4 texColor = texture(u_Texture, vec2(vCoord.x, (vCoord.y + vFrame) / FRAME_COUNT));
-   // color = mix(texColor, vec4(1.0,0.0,0.0,texColor.w),1.0 - u_Health);
-    color = texColor;
+    color = texture(u_Texture, vCoord);
   }
   ";
 
 };
-
-moneyShaderSrc: {
-  shaderVert:
-  "
-  #version 330 core
-  
-  #define FRAME_COUNT 4.0
-  #define FRAME_TIME 0.01
-  
-  layout (location = 0) in vec3 aPosition;
-  layout (location = 1) in vec2 aCoord;
-
-  uniform mat4 u_projTrans;
-  uniform mat4 u_modelTrans;
-  uniform float u_Time;
-  
-  out vec2 vCoord;
-  flat out float vFrame;
-  
-  void main() {
-    vFrame = int((u_Time - int(u_Time)) * FRAME_COUNT);
-    vCoord = aCoord;
-    gl_Position = u_projTrans * u_modelTrans * vec4(aPosition, 1.0);
-  }
-  ";
-
-  shaderFrag:
-  "
-  #version 330 core
-
-  #define FRAME_COUNT 4.0 
-  
-  precision mediump float;
-  
-  in vec2 vCoord;
-  flat in float vFrame;
-  
-  out vec4 color;
-  
-  uniform float u_Health;
-  uniform sampler2D u_Texture;
-  
-  void main() {
-     vec4 texColor = texture(u_Texture, vec2(vCoord.x, (vCoord.y + vFrame) / FRAME_COUNT));
-   // color = mix(texColor, vec4(1.0,0.0,0.0,texColor.w),1.0 - u_Health);
-    color = vec4(1.0, 0.0, 0.0, 1.0);
-  }
-  ";
-
-};
-
-SubResourceInit: [
-  PumpkinStaticShader.shaderVert PumpkinStaticShader.shaderFrag
-  (
-    ("u_modelTrans" @PumpkinVars.@modelLoc)
-    ("u_projTrans" @PumpkinVars.@projLoc)
-    ("u_Time" @PumpkinVars.@timeLoc)
-  ) loadShader @PumpkinVars.!shader
-
-  (
-    assets.pumpkinVert copy
-    assets.pumpkinHoriz copy
-  ) @PumpkinVars.!textures
-] func;
-
 

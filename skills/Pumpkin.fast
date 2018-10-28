@@ -9,7 +9,7 @@
 PumpkinVars: {
   PUMPKIN_WIDTH: 50.0r32;
   PUMPKIN_HEIGHT: 50.0r32;
-  PUMPKIN_SPEED: 300.0r32;
+  PUMPKIN_SPEED: 400.0r32;
 
   shader: GLuint;
   timeLoc: GLint;

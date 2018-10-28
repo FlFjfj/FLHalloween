@@ -13,10 +13,10 @@ WorldMap: [
       (2 1 2 1 1 1 1 1 1 1 1 1 5 1 2)
       (2 4 2 2 1 1 3 1 2 1 3 1 1 1 2)
       (2 1 1 1 1 1 1 1 1 1 1 1 3 1 2)
-      (2 4 1 1 3 1 3 2 1 5 1 1 1 1 2)
+      (2 4 1 7 3 1 3 2 1 5 1 1 1 1 2)
       (2 1 5 1 1 1 1 1 1 1 3 1 1 1 2)
       (2 1 5 1 1 3 1 1 3 1 1 1 3 1 2)
-      (2 1 1 1 1 4 1 1 1 1 1 1 1 1 2)
+      (2 1 1 1 1 4 1 1 1 7 1 1 1 1 2)
       (2 5 1 1 1 1 3 1 1 5 1 1 3 1 2)
       (2 1 1 6 3 1 1 1 1 1 3 1 1 1 2)
       (2 1 2 3 1 1 1 2 3 1 1 1 1 2 2)
@@ -25,19 +25,19 @@ WorldMap: [
       (2 5 2 6 4 3 1 1 2 1 5 1 1 1 2)
       (2 1 1 2 4 4 1 1 3 1 1 1 1 1 2)
       (2 3 2 3 4 1 1 1 3 3 2 3 2 2 2)
-      (2 1 1 4 4 1 4 1 4 2 1 5 1 1 2)
+      (2 1 7 4 4 1 4 1 4 2 1 5 1 1 2)
       (2 1 5 1 1 1 4 1 1 1 1 1 1 1 2)
       (2 5 1 4 4 2 1 4 4 1 1 1 5 1 2)
       (2 1 1 1 1 1 1 1 1 1 1 5 1 1 2)
       (2 1 1 1 4 1 4 1 4 2 1 1 2 1 2)
       (2 2 3 6 1 1 1 1 4 3 2 3 2 1 2)
-      (2 1 1 3 2 1 4 1 2 1 1 1 1 1 2)
+      (2 1 1 3 2 1 4 1 2 1 1 7 1 1 2)
       (2 3 1 2 1 4 1 5 2 1 1 2 1 5 2)
       (2 1 1 3 1 1 1 1 4 1 1 1 1 1 2)
       (2 4 1 3 5 1 6 1 4 2 1 2 1 1 2)
       (2 1 1 2 1 1 1 1 3 1 1 1 1 1 2)
       (2 1 1 2 1 1 1 3 1 1 1 2 1 1 2)
-      (2 2 1 1 1 3 1 1 1 1 1 1 1 1 2)
+      (2 2 7 1 1 3 1 1 1 1 1 1 1 1 2)
       (2 1 1 6 1 1 1 1 1 2 1 1 2 1 2)
       (2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
       (2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
@@ -118,6 +118,7 @@ WorldMap: [
           tileType 3 = [row col WorldTiles.homeWallObj.drawFloor] when
           tileType 4 = [row col WorldTiles.homeTrack.draw] when
           tileType 5 = [ row col WorldTiles.graveWallTile.drawFloor] when
+          tileType 7 = [ row col WorldTiles.lampTile.drawFloor] when
         ] times
       ] times
       0n32 glUseProgram
@@ -161,7 +162,6 @@ WorldTiles: {
     ] func;
   };
 
-
   homeTrack: {
     texture: assets.homeTrack;
 
@@ -171,7 +171,6 @@ WorldTiles: {
       assets.homeTrack 0 element @ 1 element @ WorldTiles.width WorldTiles.height 0.0r32 modelLoc batch.draw
     ] func;
   };
-
 
   woodWall: {
     drawFloor: [ row: col: Int32 cast; Int32 cast;
@@ -189,9 +188,7 @@ WorldTiles: {
 
   };
 
-
   homeWallObj: {
-
     drawFloor: [ row: col: Int32 cast; Int32 cast;
       element: col row @staticMapCoordinates @ @;
 
@@ -203,34 +200,35 @@ WorldTiles: {
 
       assets.homeWallObj 0 element @ 1 element @ WorldTiles.height 2.0r32 / + WorldTiles.width WorldTiles.height 2.0r32 * 0.0r32 modelLoc batch.draw
     ] func;
-
-
   };
 
-
   graveWallTile: {
-
-
     drawFloor: [ row: col: Int32 cast; Int32 cast;
       element: col row @staticMapCoordinates @ @;
 
       assets.graveWallTile 0 element @ 1 element @ WorldTiles.width WorldTiles.height 0.0r32 modelLoc batch.draw
     ] func;
-
-
   };
-  
+
   storeWallObj: {
-    
-     drawObj: [ row: col: Int32 cast; Int32 cast;
+
+    drawObj: [ row: col: Int32 cast; Int32 cast;
       element: col row @staticMapCoordinates @ @;
 
       assets.storeWallObj 0 element @ 1 element @ WorldTiles.height 2.0r32 / + WorldTiles.width WorldTiles.height 2.0r32 * 0.0r32 modelLoc batch.draw
     ] func;
-    
-    };
 
+  };
 
+  lampTile: {
+    drawFloor: [ row: col: Int32 cast; Int32 cast;
+      element: col row @staticMapCoordinates @ @;
+
+      assets.lampTile 0 element @ 1 element @ WorldTiles.width WorldTiles.height 0.0r32 modelLoc batch.draw
+    ] func;
+  };
+
+  lampObj: {};
 
 };
 

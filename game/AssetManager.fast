@@ -38,6 +38,8 @@ initAssets: [
   "assets/gameOverImage.png" loadTexture @assets.!gameOverImage
   "assets/playerOneWin.png" loadTexture @assets.!playerOneWin
   "assets/playerTwoWin.png" loadTexture @assets.!playerTwoWin
+  "assets/hpBar.png" loadTexture @assets.!hpBar
+  "assets/lamp.png" loadTexture @assets.!lampTile
 ] func;
 
 assets: {
@@ -51,6 +53,7 @@ assets: {
   homeWallTile: Nat32;
   
   graveWallTile: Nat32;
+  lampTile: Nat32;
   
   playerStand: Nat32;
   playerBack: Nat32;
@@ -71,4 +74,5 @@ assets: {
   menuImage: Nat32;
   playerOneWin: Nat32;
   playerTwoWin: Nat32;
+  hpBar: Nat32;
 };
