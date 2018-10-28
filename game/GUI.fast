@@ -17,35 +17,52 @@ GUI: [{
   fbTexHP: GLuint;
   fboEXP: GLuint;
   fbTexEXP: GLuint;
+  playerNearShop: FALSE;
   init: [
-    300 30 generateFramebuffer !fbTexHP !fboHP  
-    300 30 generateFramebuffer !fbTexEXP !fboEXP 
-    
+    300 30 generateFramebuffer !fbTexHP !fboHP
+    300 30 generateFramebuffer !fbTexEXP !fboEXP
+
     fboHP GL_FRAMEBUFFER glBindFramebuffer
     1.0r32 0.0r32 0.0r32 1.0r32 glClearColor
     GL_COLOR_BUFFER_BIT glClear
-    
+
     fboEXP GL_FRAMEBUFFER glBindFramebuffer
     1.0r32 0.0r32 1.0r32 0.0r32 glClearColor
     GL_COLOR_BUFFER_BIT glClear
-    
+
     0n32 GL_FRAMEBUFFER glBindFramebuffer
     0.0r32 0.0r32 0.0r32 0.0r32 glClearColor
-    
+
     hpShaderSrc.shaderVert hpShaderSrc.shaderFrag ( ("u_modelTrans" @modelLoc) ("u_projTrans" @projLoc) ) loadShader !shader
   ] func;
-  
+
   draw: [
+
     shader glUseProgram
     camera.getCombined GL_TRUE Nat8 cast 1i32 projLoc glUniformMatrix4fv
     center: player.state1 player.state0 - frameTime * player.state0 +;
+
     fbTexHP center (400.0r32 300.0r32) - unwind 300.0r32 player.health * 30.0r32 0.0r32 modelLoc batch.draw
     fbTexEXP center (400.0r32 260.0r32) - unwind 300.0r32 player.exp * 30.0r32 0.0r32 modelLoc batch.draw
+    
+    playerNearShop [
+      assets.damageUpgradeOffer center (0.0r32 -300.0r32) - unwind 100.0r32 100.0r32 0.0r32 modelLoc batch.draw
+    ] when
+    
     0n32 glUseProgram
   ] func;
 
   update: [
-  
+    FALSE !playerNearShop
+    map.mapWidth dynamic [ col: i dynamic;
+      map.mapHeight dynamic [ row: i dynamic;
+        col row map.staticMap @ @ 6 = [
+          col row map.staticMapCoordinates @ @ player.state1 - len 150.0r32 < [
+            TRUE !playerNearShop
+          ] when
+        ] when
+      ] times
+    ] times
   ] func;
 
 }] func;

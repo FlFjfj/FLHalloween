@@ -36,6 +36,14 @@ initAssets: [
   "assets/pumpkinVert.png" loadTexture @assets.!pumpkinVert
   "assets/pumpkinHoriz.png" loadTexture @assets.!pumpkinHoriz
   "assets/gameOverImage.png" loadTexture @assets.!gameOverImage
+  "assets/damageUpgradeOffer.png" loadTexture @assets.!damageUpgradeOffer
+  
+  "assets/bossBack.png" loadTexture @assets.!bossBack
+  "assets/bossFront.png" loadTexture @assets.!bossFront
+  "assets/bossSideLeft.png" loadTexture @assets.!bossSideLeft
+  "assets/bossSideRight.png" loadTexture @assets.!bossSideRight
+  "assets/bossFront.png" loadTexture @assets.!bossStand
+
 ] func;
 
 assets: {
@@ -67,4 +75,12 @@ assets: {
 
   gameOverImage: Nat32;
   menuImage: Nat32;
+  damageUpgradeOffer: Nat32;
+  
+  bossBack: Nat32;
+  bossFront: Nat32;
+  bossSideLeft: Nat32;
+  bossSideRight: Nat32;
+  bossStand: Nat32;
+  
 };

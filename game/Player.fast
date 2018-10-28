@@ -47,6 +47,7 @@ Player: [{
   speed: 400.0r32;
 
   fakeLightSys: LightSystem;
+  damageScale: 1.0r32 dynamic;
   pumpkinTimer: 0n32;
   pumpkins: (0.0r32 0.0r32) (0.0r32 0.0r32) @fakeLightSys createPumpkin Array;
 

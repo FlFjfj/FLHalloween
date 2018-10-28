@@ -20,6 +20,7 @@ Application: [{
     MainGame: 0n8;
     MainMenu: 1n8;
     GameOver: 2n8;
+    WinScreen: 3n8;
   };
 
   currentState: Nat8;
@@ -31,7 +32,10 @@ Application: [{
       GameState.MainMenu [@MainMenu.enterState]
       GameState.MainGame [@MainGame.enterState]
       GameState.GameOver [@GameOver.enterState]
-      ["invalid state" failProc]
+      GameState.WinScreen [@WinScreen.enterState]
+      [
+        currentState print LF print
+        "invalid state" failProc]
     ) case
   ] func;
 
@@ -47,6 +51,7 @@ Application: [{
       GameState.MainMenu [@MainMenu.draw]
       GameState.MainGame [@MainGame.draw]
       GameState.GameOver [@GameOver.draw]
+      GameState.WinScreen [@WinScreen.draw]
       []
     ) case
   ] func;
@@ -58,6 +63,7 @@ Application: [{
       GameState.MainMenu [@MainMenu.update]
       GameState.MainGame [@MainGame.update]
       GameState.GameOver [@GameOver.update]
+      GameState.WinScreen [@WinScreen.update]
       []
     ) case
   ] func;
@@ -70,6 +76,7 @@ Application: [{
     @MainGame.init
     @MainMenu.init
     @GameOver.init
+    @WinScreen.init
     GameState.MainMenu changeState
   ] func;
 
@@ -105,7 +112,7 @@ Application: [{
 
   onWindowResize: [
     newWindowSize:;
-   # DEBUG ["onWindowResize " print 0 newWindowSize @ print " " print 1 newWindowSize @ print LF print] when
+    # DEBUG ["onWindowResize " print 0 newWindowSize @ print " " print 1 newWindowSize @ print LF print] when
   ] func;
 
   onKeyPress: [
@@ -116,6 +123,8 @@ Application: [{
       (
         GameState.MainMenu [@system.stop]
         GameState.MainGame [GameState.MainMenu changeState]
+        GameState.GameOver [@system.stop]
+        GameState.WinScreen [@system.stop]
         ["invalid state" failProc]
       ) case
     ] when
@@ -124,32 +133,39 @@ Application: [{
 
   onKeyRelease: [
     key: copy;
-   # DEBUG ["onKeyRelease " print key print LF print] when
+    currentState
+    (
+      GameState.MainMenu []
+      GameState.MainGame [key @MainGame.onKeyRelease]
+      GameState.GameOver []
+      []
+    ) case
+    # DEBUG ["onKeyRelease " print key print LF print] when
     #TODO
   ] func;
 
   onCharacter: [
     character: copy;
-  #  DEBUG ["onCharacter " print character print LF print] when
+    #  DEBUG ["onCharacter " print character print LF print] when
     Cond
     #TODO
   ] func;
 
   onMousePosition: [
     mousePosition:;
-  #  DEBUG ["onMousePosition " print 0 mousePosition @ print " " print 1 mousePosition @ print LF print] when
+    #  DEBUG ["onMousePosition " print 0 mousePosition @ print " " print 1 mousePosition @ print LF print] when
     #TODO
   ] func;
 
   onMouseDelta: [
     mouseDelta:;
-  #  DEBUG ["onMouseDelta " print 0 mouseDelta @ print " " print 1 mouseDelta @ print LF print] when
+    #  DEBUG ["onMouseDelta " print 0 mouseDelta @ print " " print 1 mouseDelta @ print LF print] when
     #TODO
   ] func;
 
   onMouseWheel: [
     delta: copy;
-  #  DEBUG ["onMouseWheel " print delta print LF print] when
+    #  DEBUG ["onMouseWheel " print delta print LF print] when
     #TODO
   ] func;
 } dynamic] func;

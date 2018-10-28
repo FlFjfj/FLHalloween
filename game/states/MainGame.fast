@@ -24,15 +24,16 @@ MainGame: {
   player: Player;
   monsters: Monster Array;
   gui: GUI;
-  
+ # boss: Boss;
   lightSys: LightSystem;
-  
+
   init: [
     system.getTime @lastMonsterTime set
     @batch.init
     @map.init
     @player.init
     @gui.init
+  #  @boss.init
   ] func;
 
   enterState: [
@@ -44,6 +45,7 @@ MainGame: {
     @camera.beforeDraw
     map.drawFloor
     player.draw
+    boss.draw
     monsters fieldCount [i monsters @ .draw] times
     map.drawObj
     sys: lightSys;
@@ -71,6 +73,23 @@ MainGame: {
     player.health 0.0r32 > not [
       GameState.GameOver changeState
     ] when
+    
+   # @boss.update not [
+  #    GameState.WinScreen changeState  
+  #  ] when
+    
+    @gui.update
   ] func;
 
+  onKeyRelease: [
+    key:;
+    key dynamic KEY_L = [
+      gui dynamic .playerNearShop [
+        player.exp dynamic 0.6999r32 > [
+          player.exp 0.7r32 - @player.!exp
+          player.damageScale 1.5r32 * @player.!damageScale
+        ] when
+      ] when
+    ] when
+  ] func;
 };

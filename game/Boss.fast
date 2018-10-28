@@ -1,33 +1,33 @@
-"monster" module
+"boss" module
 
 "control" useModule
 "algebra" useModule
 "opengl" useModule
 "randomLCG" useModule
+
 random: RandomLCG;
 getRandomCoords: [
   (@random.getr32 1000.0r32 * 500.0r32 -  @random.getr32  1000.0r32 * 500.0r32 -)
 ] func;
 
-Monster: [{
-  state0: getRandomCoords;
+Boss: [{
+  state0: (10.0r32 10.0r32);
   state1: state0 copy;
-  health: 1.0r32;
-  moveDir: MonsterConst.DIR_NONE copy;
-  speed: 150.0r32;
-
+  health: 10.0r32;
+  moveDir: BossConst.DIR_NONE copy;
+  speed: 50.0r32;
   lamp: 0i32;
 
   init: [
-    MonsterConst.initialized not [
+    BossConst.initialized not [
       (
-        assets.ghostStand copy
-        assets.ghostBack copy
-        assets.ghostFront copy
-        assets.ghostSideLeft copy
-        assets.ghostSideRight copy
-      ) @MonsterConst.@texture set
-      MonsterAnimatedShader.shaderVert MonsterAnimatedShader.shaderFrag
+        assets.bossStand copy
+        assets.bossBack copy
+        assets.bossFront copy
+        assets.bossSideLeft copy
+        assets.bossSideRight copy
+      ) @BossConst.@texture set
+      BossAnimatedShader.shaderVert BossAnimatedShader.shaderFrag
       (
         ("u_modelTrans" @MonsterConst.@modelLoc)
         ("u_projTrans"  @MonsterConst.@projLoc)
@@ -36,8 +36,8 @@ Monster: [{
         ("u_radius"    @MonsterConst.@lightRadLoc)
         ("u_color"     @MonsterConst.@lightColorLoc)
         ("u_used"      @MonsterConst.@lightUsedLoc)
-      ) loadShader @MonsterConst.@shader set
-      TRUE @MonsterConst.@initialized set
+      ) loadShader @BossConst.@shader set
+      TRUE @BossConst.@initialized set
     ] when
 
     @lightSys.reserveLight !lamp
@@ -76,38 +76,48 @@ Monster: [{
   ] func;
 
   update: [
-    MonsterConst.DIR_NONE copy !moveDir
+    BossConst.DIR_NONE copy !moveDir
     state1 @state0 set
     direction: player.state1 state1 -;
 
     0 direction @ 1.0r32 > [
-      MonsterConst.DIR_RIGHT copy !moveDir
+      BossConst.DIR_RIGHT copy !moveDir
     ] when
 
     0 direction @ -1.0r32 < [
-      MonsterConst.DIR_LEFT copy !moveDir
+      BossConst.DIR_LEFT copy !moveDir
     ] when
 
     1 direction @ 1.0r32 > [
-      MonsterConst.DIR_UP copy !moveDir
+      BossConst.DIR_UP copy !moveDir
     ] when
 
     1 direction @ -1.0r32 < [
-      MonsterConst.DIR_DOWN copy !moveDir
+      BossConst.DIR_DOWN copy !moveDir
     ] when
 
-    direction len PlayerConst.WIDTH 2.0r32 / > [
-      newState1: direction normalize speed * FRAME_DURATION * state0 +;
-      newState1 toLegs isOnWall? ~ [
-        newState1 @state1 set
-      ] when
+    distance: direction len;
+    distance PlayerConst.WIDTH 2.0r32 / > [
+      distance 1000.0r32 < [
+        newState1: direction normalize speed * FRAME_DURATION * state0 +;
+        newState1 toLegs isOnWall? ~ [
+          newState1 @state1 set
+        ] when
+      ] [
+        (1.0r32 1.0r32) state0 - (0.0r32 0.0r32) = not [
+          newState1: (1.0r32 1.0r32) state0 - normalize speed * FRAME_DURATION * state0 +;
+          newState1 toLegs isOnWall? ~ [
+            newState1 @state1 set
+          ] when
+        ] when
+      ] if
     ] [
-      player.health FRAME_DURATION MonsterConst.SECONDS_TO_KILL / - @player.!health
+      player.health FRAME_DURATION BossConst.SECONDS_TO_KILL / - @player.!health
     ] if
 
     dies: health 0.0r32 <;
     dies [
-      player.exp MonsterConst.EXP_FOR_KILL + @player.!exp
+      player.exp BossConst.EXP_FOR_KILL + @player.!exp
       player.exp 1.0r32 > [
         1.0r32  @player.!exp
       ] when
@@ -145,9 +155,9 @@ Monster: [{
   ] func;
 }] func;
 
-MonsterConst: {
-  EXP_FOR_KILL: 0.1r32;
-  SECONDS_TO_KILL: 3.0r32;
+BossConst: {
+  EXP_FOR_KILL: 9000.0001r32;
+  SECONDS_TO_KILL: 1.0r32;
   initialized: FALSE;
   texture: (5 [GLuint] times);
   shader: GLuint;
@@ -158,8 +168,8 @@ MonsterConst: {
   lightPosLoc: GLint;
   lightRadLoc: GLint;
   lightColorLoc: GLint;
-  WIDTH: 100.0r32;
-  HEIGHT: 150.0r32;
+  WIDTH: 300.0r32;
+  HEIGHT: 300.0r32;
 
   DIR_NONE:  0;
   DIR_UP:    1;
@@ -169,7 +179,7 @@ MonsterConst: {
 
 };
 
-MonsterAnimatedShader: {
+BossAnimatedShader: {
   shaderVert:
   "
   #version 330 core
@@ -226,7 +236,7 @@ MonsterAnimatedShader: {
       }
     }
   
-    vec4 texColor = texture(u_Texture, vec2(vCoord.x, (vCoord.y + vFrame) / FRAME_COUNT));
+    vec4 texColor = texture(u_Texture, vec2((vCoord.x + vFrame) / FRAME_COUNT, vCoord.y));
     color = vec4(mix(texColor.xyz * lightColor, texColor.xyz, 0.05), texColor.a);
   }
   ";
