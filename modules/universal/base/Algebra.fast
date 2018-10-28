@@ -426,7 +426,7 @@ translate2d: [
   ) *
 ] func;
 
-print: [isVector?] [
+printV: [isVector?] [
   v:; v fieldCount [
     i v @ print " " print
   ] times

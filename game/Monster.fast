@@ -1,0 +1,168 @@
+"monster" module
+
+"control" useModule
+"algebra" useModule
+"opengl" useModule
+"randomLCG" useModule
+random: RandomLCG;
+getRandomCoords: [
+  (@random.getr32 1000.0r32 * 500.0r32 -  @random.getr32  1000.0r32 * 500.0r32 -)
+] func;
+Monster: [{
+  state0: getRandomCoords;
+  state1: state0 copy;
+
+  moveDir: MonsterConst.DIR_NONE copy;
+  speed: 200.0r32;
+
+  init: [
+    MonsterConst.initialized not [
+      (
+        assets.ghostStand copy
+        assets.ghostBack copy
+        assets.ghostFront copy
+        assets.ghostSideLeft copy
+        assets.ghostSideRight copy
+      ) @MonsterConst.@texture set
+      MonsterAnimatedShader.shaderVert MonsterAnimatedShader.shaderFrag
+      (
+        ("u_modelTrans" @MonsterConst.@modelLoc)
+        ("u_projTrans" @MonsterConst.@projLoc)
+        ("u_Time" @MonsterConst.@timeLoc)
+      ) loadShader @MonsterConst.@shader set
+      TRUE @MonsterConst.@initialized set
+    ] when
+  ] func;
+
+  draw: [
+    MonsterConst.shader glUseProgram
+    coords: state0 state1 state0 - frameTime * +;
+    getTime MonsterConst.timeLoc glUniform1f
+    camera.getCombined GL_TRUE Nat8 cast 1i32 MonsterConst.projLoc glUniformMatrix4fv
+    moveDir MonsterConst.texture @
+    coords unwind
+    MonsterConst.WIDTH
+    MonsterConst.HEIGHT
+    0.0r32
+    MonsterConst.modelLoc batch.draw
+    0n32 glUseProgram
+  ] func;
+
+  update: [
+    MonsterConst.DIR_NONE copy !moveDir
+    state1 @state0 set
+    direction: player.state1 state1 -;
+    0 direction @ 1.0r32 > [
+      MonsterConst.DIR_RIGHT copy !moveDir
+    ] when
+
+    0 direction @ -1.0r32 < [
+      MonsterConst.DIR_LEFT copy !moveDir
+    ] when
+
+    1 direction @ 1.0r32 > [
+      MonsterConst.DIR_UP copy !moveDir
+    ] when
+
+    1 direction @ -1.0r32 < [
+      MonsterConst.DIR_DOWN copy !moveDir
+    ] when
+    
+    (0.0r32 0.0r32) direction = ~ [
+      newState1: direction normalize speed * FRAME_DURATION * state0 +;
+      newState1 toLegs isOnWall? ~ [
+        newState1 @state1 set
+      ] when
+    ] when
+  ] func;
+
+  toLegs: [
+    (0.0r32 PlayerConst.HEIGHT 2.0r32 /) -
+  ] func;
+
+  isOnWall?: [
+    coords:;
+    map: MainGame.map;
+    result: FALSE;
+    map.mapWidth [col: i;
+      map.mapHeight [row: i;
+        col row isWallTile? [
+          tileCoords: col row map.staticMapCoordinates @ @;
+          coords tileCoords - len map.R Real32 cast 22.0r32 + < result or !result
+        ] when
+      ] times
+    ] times
+
+    result
+  ] func;
+
+  isWallTile?: [
+    MainGame.map.staticMap @ @ 2 =
+  ] func;
+}] func;
+
+MonsterConst: {
+  initialized: FALSE;
+  texture: (5 [GLuint] times);
+  shader: GLuint;
+  timeLoc: GLint;
+  projLoc: GLint;
+  modelLoc: GLint;
+  WIDTH: 100.0r32;
+  HEIGHT: 150.0r32;
+
+  DIR_NONE:  0;
+  DIR_UP:    1;
+  DIR_DOWN:  2;
+  DIR_LEFT:  3;
+  DIR_RIGHT: 4;
+
+};
+
+
+MonsterAnimatedShader: {
+  shaderVert:
+  "
+  #version 330 core
+  
+  #define FRAME_COUNT 4.0
+  #define FRAME_TIME 0.15
+  
+  layout (location = 0) in vec3 aPosition;
+  layout (location = 1) in vec2 aCoord;
+
+  uniform mat4 u_projTrans;
+  uniform mat4 u_modelTrans;
+  uniform float u_Time;
+  
+  out vec2 vCoord;
+  flat out float vFrame;
+  
+  void main() {
+    vFrame = int((u_Time - int(u_Time)) * FRAME_COUNT);
+    vCoord = aCoord;
+    gl_Position = u_projTrans * u_modelTrans * vec4(aPosition, 1.0);
+  }
+  ";
+
+  shaderFrag:
+  "
+  #version 330 core
+
+  #define FRAME_COUNT 4.0 
+  
+  precision mediump float;
+  
+  in vec2 vCoord;
+  flat in float vFrame;
+  
+  out vec4 color;
+  
+  uniform sampler2D u_Texture;
+  
+  void main() {
+    color = texture(u_Texture, vec2(vCoord.x, (vCoord.y + vFrame) / FRAME_COUNT));
+  }
+  ";
+
+};

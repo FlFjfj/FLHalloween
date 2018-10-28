@@ -19,13 +19,15 @@ MainGame: {
   batch: spriteBatch;
   camera: WORLD_WIDTH WORLD_HEIGHT orthographicCamera;
   startTime: Real32;
-  
+  lastMonsterTime: Real32;
   player: Player;
-  
+  monsters: Monster Array;
   init: [
+    system.getTime @lastMonsterTime set
     @batch.init
     @map.init
     @player.init
+    Monster.init
   ] func;
 
   enterState: [
@@ -37,13 +39,20 @@ MainGame: {
     @camera.beforeDraw
     map.drawFloor
     player.draw
+    monsters fieldCount [i monsters @ .draw] times
     map.drawObj
   ] func;
 
   update: [
+    time: system.getTime;
+    time lastMonsterTime - 5.0r32 > [
+      time @lastMonsterTime set
+      Monster @monsters.pushBack
+    ] when
+    
     @map.update
     @player.update
-    
+    monsters fieldCount [i @monsters @ .update] times
     @camera.update
   ] func;
 

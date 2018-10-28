@@ -95,6 +95,9 @@
     <Fast Include="skills\Pumpkin.fast">
       <Filter>game\skills</Filter>
     </Fast>
+    <Fast Include="game\Monster.fast">
+      <Filter>game</Filter>
+    </Fast>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="sl">
