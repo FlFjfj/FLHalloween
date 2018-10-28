@@ -14,7 +14,7 @@ Monster: [{
   state1: state0 copy;
   health: 1.0r32;
   moveDir: MonsterConst.DIR_NONE copy;
-  speed: 75.0r32;
+  speed: 150.0r32;
 
   lamp: 0i32;
 
@@ -146,7 +146,7 @@ Monster: [{
 }] func;
 
 MonsterConst: {
-  EXP_FOR_KILL: 0.3r32;
+  EXP_FOR_KILL: 0.1r32;
   SECONDS_TO_KILL: 3.0r32;
   initialized: FALSE;
   texture: (5 [GLuint] times);

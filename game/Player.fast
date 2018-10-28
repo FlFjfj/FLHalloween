@@ -16,7 +16,7 @@ PlayerConst: {
   DIR_LEFT:  3;
   DIR_RIGHT: 4;
 
-  PUMPKIN_RELOAD: 10n32;
+  PUMPKIN_RELOAD: 5n32;
 };
 
 PlayerControls: {

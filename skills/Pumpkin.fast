@@ -15,7 +15,7 @@ PumpkinVars: {
   timeLoc: GLint;
   projLoc: GLint;
   modelLoc: GLint;
-  damage: 0.6r32;
+  damage: 0.251r32;
   textures: (2 [GLuint] times);
 };
 
@@ -48,7 +48,7 @@ Pumpkin: [{
     collided: FALSE;
     monsters fieldCount [
       monster: i @monsters @;
-      monster.state1 state1 - len PumpkinVars.PUMPKIN_WIDTH 2.0r32 * < [
+      monster.state1 position_new - len PumpkinVars.PUMPKIN_WIDTH 2.0r32 * < [
         monster.health PumpkinVars.damage - @monster.@health set
         TRUE !collided
       ] when
