@@ -48,7 +48,7 @@ Pumpkin: [{
     collided: FALSE;
     monsters fieldCount [
       monster: i @monsters @;
-      monster.state1 state1 - len PumpkinVars.PUMPKIN_WIDTH < [
+      monster.state1 state1 - len PumpkinVars.PUMPKIN_WIDTH 2.0r32 * < [
         monster.health PumpkinVars.damage - @monster.@health set
         TRUE !collided
       ] when
@@ -65,7 +65,7 @@ Pumpkin: [{
       map.mapHeight [row: i;
         col row isWallTile? [
           tileCoords: col row map.staticMapCoordinates @ @;
-          coords tileCoords - len map.R Real32 cast 25.0r32 + < result or !result
+          coords tileCoords - len map.R Real32 cast 35.0r32 + < result or !result
         ] when
       ] times
     ] times

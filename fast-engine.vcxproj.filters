@@ -98,6 +98,9 @@
     <Fast Include="game\Monster.fast">
       <Filter>game</Filter>
     </Fast>
+    <Fast Include="game\LightSystem.fast">
+      <Filter>game</Filter>
+    </Fast>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="sl">

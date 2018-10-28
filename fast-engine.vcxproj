@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <Fast Include="game\AssetManager.fast" />
+    <Fast Include="game\LightSystem.fast" />
     <Fast Include="game\Monster.fast" />
     <Fast Include="game\Player.fast" />
     <Fast Include="game\states\MainGame.fast" />

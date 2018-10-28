@@ -1,0 +1,41 @@
+"light" module
+
+"control" useModule
+"array" useModule
+
+LightSystem: [{
+
+  MAXIMUM: 32i32;
+
+  position: (MAXIMUM [(Real32 Real32)] times);
+  radius:   (MAXIMUM [Real32] times);
+  color:    (MAXIMUM [(Real32 Real32 Real32)] times);
+  used:     (MAXIMUM [Real32] times);
+
+  reserveLight: [
+    isFound: FALSE;
+    
+    MAXIMUM [
+      i used @ 0.0r32 =
+      [
+        i copy
+        1.0r32 i @used @ set
+        TRUE !isFound
+        MAXIMUM copy !i
+      ] when
+    ] times
+
+    isFound [] [-1] if
+  ] func;
+
+  freeLight: [
+    i:;
+    0.0r32 i @used @ set
+  ] func;
+
+  getPosition: [position storageAddress Real32 Cref cast] func;
+  getRadius:   [radius   storageAddress Real32 Cref cast] func;
+  getColor:    [color    storageAddress Real32 Cref cast] func;
+  getUsed:     [used     storageAddress Real32 Cref cast] func;
+
+}] func;

@@ -8,13 +8,14 @@ random: RandomLCG;
 getRandomCoords: [
   (@random.getr32 1000.0r32 * 500.0r32 -  @random.getr32  1000.0r32 * 500.0r32 -)
 ] func;
+
 Monster: [{
   state0: getRandomCoords;
   state1: state0 copy;
   health: 1.0r32;
   moveDir: MonsterConst.DIR_NONE copy;
-  speed: 200.0r32;
-   
+  speed: 75.0r32;
+
   init: [
     MonsterConst.initialized not [
       (

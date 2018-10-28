@@ -38,9 +38,22 @@ WorldMap: [
     shader: GLuint;
     projLoc: GLint;
     modelLoc: GLint;
+    lightUsedLoc: GLint;
+    lightPosLoc: GLint;
+    lightRadLoc: GLint;
+    lightColorLoc: GLint;
 
     init: [
-      DefaultTileShader.shaderVert DefaultTileShader.shaderFrag ( ("u_modelTrans" @modelLoc) ("u_projTrans" @projLoc) ) loadShader !shader
+      DefaultTileShader.shaderVert DefaultTileShader.shaderFrag
+      (
+        ("u_modelTrans" @modelLoc)
+        ("u_projTrans" @projLoc)
+        ("u_Light[0].position" @lightPosLoc)
+        ("u_Light[0].radius" @lightRadLoc)
+        ("u_Light[0].color" @lightColorLoc)
+        ("u_Light[0].used" @lightUsedLoc)
+      ) loadShader !shader
+
       mapHeight [row: i dynamic;
         mapWidth [col: i dynamic;
           element: col row @staticMapCoordinates @ @;
@@ -71,7 +84,13 @@ WorldMap: [
 
     drawFloor: [
       shader glUseProgram
+
       camera.getCombined GL_TRUE Nat8 cast 1i32 projLoc glUniformMatrix4fv
+      lightSys.getColor    1i32 lightColorLoc glUniform3fv
+      lightSys.getPosition 1i32 lightPosLoc   glUniform2fv
+      lightSys.getRadius   1i32 lightRadLoc   glUniform1fv
+      lightSys.getUsed     1i32 lightUsedLoc  glUniform1fv
+
       mapHeight [row: mapHeight  i - 1 -  dynamic;
         mapWidth [col: i dynamic;
           tileType: col row staticMap @ @;
@@ -80,12 +99,10 @@ WorldMap: [
           tileType 3 = [row col WorldTiles.homeWallObj.drawFloor] when
           tileType 4 = [row col WorldTiles.homeTrack.draw] when
           tileType 5 = [ row col WorldTiles.graveWallTile.drawFloor] when
-          
         ] times
       ] times
       0n32 glUseProgram
     ] func;
-
 
     drawObj: [
       shader glUseProgram
@@ -96,12 +113,10 @@ WorldMap: [
           tileType 2 = [ row col  WorldTiles.woodWall.drawObj] when
           tileType 3 = [ row col WorldTiles.homeWallObj.drawObj] when
           tileType 6 = [ row col WorldTiles.storeWallObj.drawObj] when
-          
         ] times
       ] times
       0n32 glUseProgram
     ] func;
-
 
     update: [
 
@@ -157,7 +172,7 @@ WorldTiles: {
 
 
   homeWallObj: {
-    
+
     drawFloor: [ row: col: Int32 cast; Int32 cast;
       element: col row @staticMapCoordinates @ @;
 
@@ -172,17 +187,17 @@ WorldTiles: {
 
 
   };
-  
-  
-    graveWallTile: {
-    
-   
-   drawFloor: [ row: col: Int32 cast; Int32 cast;
+
+
+  graveWallTile: {
+
+
+    drawFloor: [ row: col: Int32 cast; Int32 cast;
       element: col row @staticMapCoordinates @ @;
 
       assets.graveWallTile 0 element @ 1 element @ WorldTiles.width WorldTiles.height 0.0r32 modelLoc batch.draw
     ] func;
-  
+
 
   };
   
@@ -207,35 +222,46 @@ DefaultTileShader: {
 
   layout (location = 0) in vec3 aPosition;
   layout (location = 1) in vec2 aCoord;
-
+  
   uniform mat4 u_projTrans;
   uniform mat4 u_modelTrans;
-
+  
   out vec2 vCoord;
+  out vec2 worldCoord;
   
   void main() {
-
     vCoord = aCoord;
-    gl_Position = u_projTrans * u_modelTrans * vec4(aPosition, 1.0);
+    vec4 position = u_modelTrans * vec4(aPosition, 1.0);
+    worldCoord = position.xy;
+    gl_Position = u_projTrans * position;
   }
   ";
 
   shaderFrag:
   "
-#version 330 core
-
+  #version 330 core
   precision mediump float;
   
+  struct LightSource {
+    vec2 position;
+    vec3 color;
+    float radius;
+    float used;
+  };
+  
   in vec2 vCoord;
+  in vec2 worldCoord;
+  
   out vec4 color;
   
   uniform sampler2D u_Texture;
+  uniform LightSource u_Light[32];
+  uniform int u_lightCount;
   
   void main() {
-    color = texture(u_Texture, vCoord);
+    float len = clamp(1.0 - length(worldCoord - u_Light[0].position) / u_Light[0].radius, 0.0, 1.0);
+    vec4 texColor = texture(u_Texture, vCoord);
+    color = vec4(texColor.xyz * len * len * u_Light[0].color, texColor.a);
   }
   ";
 };
-
-
-#{{ 2, 0, 0, 0}, {0, 1/2, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}} . {{cos(-pi/4), sin(-pi/4), 0 , 0},{-sin(-pi/4), cos(-pi/4), 0 , 0}, {0, 0, 1, 0}, {0,0,0,1}}
