@@ -4,8 +4,6 @@
 "algebra" useModule
 "array" useModule
 
-
-
 PlayerConst: {
   WIDTH: 100.0r32;
   HEIGHT: 150.0r32;
@@ -16,16 +14,7 @@ PlayerConst: {
   DIR_LEFT:  3;
   DIR_RIGHT: 4;
 
-  PUMPKIN_RELOAD: 5n32;
-};
-
-PlayerControls: {
-  keyLeft: Int32;
-  keyRight: Int32;
-  keyUp: Int32;
-  keyDown: Int32;
-
-  useFirst: Int32;
+  PUMPKIN_RELOAD: 10n32;
 };
 
 Player: [{
@@ -44,7 +33,7 @@ Player: [{
   lightPosLoc: GLint;
   lightRadLoc: GLint;
   lightColorLoc: GLint;
-  speed: 400.0r32;
+  speed: 250.0r32;
 
   fakeLightSys: LightSystem;
   pumpkinTimer: 0n32;
@@ -52,7 +41,23 @@ Player: [{
 
   lamp: 0i32;
 
+  PlayerControls: {
+    keyLeft: Int32;
+    keyRight: Int32;
+    keyUp: Int32;
+    keyDown: Int32;
+
+    useFirst: Int32;
+  };
+
   init: [
+    controls:;
+    controls.keyLeft  copy @PlayerControls.!keyLeft
+    controls.keyRight copy @PlayerControls.!keyRight
+    controls.keyUp    copy @PlayerControls.!keyUp 
+    controls.keyDown  copy @PlayerControls.!keyDown 
+    controls.useFirst copy @PlayerControls.!useFirst
+
     (
       assets.playerStand copy
       assets.playerBack copy
@@ -70,12 +75,6 @@ Player: [{
       ("u_color"      @lightColorLoc)
       ("u_used"       @lightUsedLoc)
     ) loadShader !shader
-
-    LEFT @PlayerControls.!keyLeft
-    RIGHT @PlayerControls.!keyRight
-    UP @PlayerControls.!keyUp
-    DOWN @PlayerControls.!keyDown
-    KEY_M @PlayerControls.!useFirst
 
     SubResourceInit
 
@@ -106,6 +105,8 @@ Player: [{
   ] func;
 
   update: [
+    camera:;
+
     PlayerConst.DIR_NONE copy !moveDir
     state1 @state0 set
 
@@ -138,15 +139,15 @@ Player: [{
       ] when
     ] when
 
-    cameraCoords: (MainGame.camera.x copy  MainGame.camera.y copy);
+    cameraCoords: (camera.x copy  camera.y copy);
     playerToCamera: state1 cameraCoords -;
     #playerToCamera len WORLD_HEIGHT 2.0r32 / > [
     #  newTranslate: playerToCamera normalize WORLD_HEIGHT 2.0r32 / * state1 +;
     #  newTranslate unwind @MainGame.@camera.setTranslate
     #] when
 
-    state0 @camera.@state0 set
-    state1 @camera.@state1 set
+    state0 (WORLD_WIDTH 8.0r32 / 0.0r32) + @camera.@state0 set
+    state1 (WORLD_WIDTH 8.0r32 / 0.0r32) + @camera.@state1 set
 
     pumpkinTimer 1n32 + !pumpkinTimer
 

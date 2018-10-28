@@ -9,7 +9,7 @@
 PumpkinVars: {
   PUMPKIN_WIDTH: 50.0r32;
   PUMPKIN_HEIGHT: 50.0r32;
-  PUMPKIN_SPEED: 600.0r32;
+  PUMPKIN_SPEED: 300.0r32;
 
   shader: GLuint;
   timeLoc: GLint;
@@ -30,11 +30,11 @@ Pumpkin: [{
   lamp: 0i32;
 
   @lightSys.reserveLight !lamp
-  lamp -1i32 = neg
+  lamp -1i32 = not
   [
     (0.7r32 0.7r32 0.0r32) lamp @lightSys.@color @ set
     100.0r32 lamp @lightSys.@radius @ set
-    coords lamp @lightSys.@position @ set
+    position lamp @lightSys.@position @ set
   ] when
 
   0 direction @ 0.0r32 = ~
